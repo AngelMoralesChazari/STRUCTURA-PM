@@ -133,12 +133,12 @@ export const ProgramacionInsumos: React.FC<ProgramacionInsumosProps> = ({ proyec
   };
 
   const handleProgramQtyChange = (conceptoId: string, periodo: string, valStr: string) => {
-    const value = valStr === '' ? 0 : Number(valStr);
+    const value = valStr === '' ? '' : Number(valStr);
     setEditingProgramacion(prev => ({
       ...prev,
       [conceptoId]: {
         ...(prev[conceptoId] || {}),
-        [periodo]: value
+        [periodo]: value as any
       }
     }));
   };

@@ -24,7 +24,7 @@ export const ConceptosCatalogo: React.FC<ConceptosCatalogoProps> = ({ proyecto, 
   const [newCodigo, setNewCodigo] = useState('');
   const [newDescripcion, setNewDescripcion] = useState('');
   const [newUnidad, setNewUnidad] = useState('m3');
-  const [newCantidad, setNewCantidad] = useState(1);
+  const [newCantidad, setNewCantidad] = useState<number | ''>(1);
 
   useEffect(() => {
     setLoading(true);
@@ -665,7 +665,7 @@ export const ConceptosCatalogo: React.FC<ConceptosCatalogoProps> = ({ proyecto, 
                     step="0.01"
                     required
                     value={newCantidad}
-                    onChange={(e) => setNewCantidad(Number(e.target.value))}
+                    onChange={(e) => setNewCantidad(e.target.value === '' ? '' : Number(e.target.value))}
                     className="w-full text-xs border border-light-slate rounded p-2 focus:outline-none focus:border-ocean-blue bg-slate-50 text-right font-mono"
                   />
                 </div>

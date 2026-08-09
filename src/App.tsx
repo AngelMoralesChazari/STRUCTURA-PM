@@ -46,9 +46,9 @@ function App() {
   const [newProjDesc, setNewProjDesc] = useState('');
   const [newProjUbicacion, setNewProjUbicacion] = useState('');
   const [newProjContratista, setNewProjContratista] = useState('');
-  const [newProjAnticipo, setNewProjAnticipo] = useState(30);
-  const [newProjRetencion, setNewProjRetencion] = useState(5);
-  const [newProjIva, setNewProjIva] = useState(16);
+  const [newProjAnticipo, setNewProjAnticipo] = useState<number | ''>(30);
+  const [newProjRetencion, setNewProjRetencion] = useState<number | ''>(5);
+  const [newProjIva, setNewProjIva] = useState<number | ''>(16);
   const [newProjInicio, setNewProjInicio] = useState('');
   const [newProjFin, setNewProjFin] = useState('');
 
@@ -352,7 +352,7 @@ function App() {
                       type="number"
                       required
                       value={newProjAnticipo}
-                      onChange={(e) => setNewProjAnticipo(Number(e.target.value))}
+                      onChange={(e) => setNewProjAnticipo(e.target.value === '' ? '' : Number(e.target.value))}
                       className="w-full border border-light-slate rounded p-2 focus:outline-none focus:border-ocean-blue bg-slate-50 font-mono text-right"
                     />
                   </div>
@@ -362,7 +362,7 @@ function App() {
                       type="number"
                       required
                       value={newProjRetencion}
-                      onChange={(e) => setNewProjRetencion(Number(e.target.value))}
+                      onChange={(e) => setNewProjRetencion(e.target.value === '' ? '' : Number(e.target.value))}
                       className="w-full border border-light-slate rounded p-2 focus:outline-none focus:border-ocean-blue bg-slate-50 font-mono text-right"
                     />
                   </div>
@@ -372,7 +372,7 @@ function App() {
                       type="number"
                       required
                       value={newProjIva}
-                      onChange={(e) => setNewProjIva(Number(e.target.value))}
+                      onChange={(e) => setNewProjIva(e.target.value === '' ? '' : Number(e.target.value))}
                       className="w-full border border-light-slate rounded p-2 focus:outline-none focus:border-ocean-blue bg-slate-50 font-mono text-right"
                     />
                   </div>

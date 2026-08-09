@@ -46,12 +46,16 @@ export const ProgramacionInsumos: React.FC<ProgramacionInsumosProps> = ({ proyec
 
     // Generate periods based on start and end dates (e.g. "2026-08", "2026-09", etc.)
     const generatePeriods = () => {
-      const start = new Date(proyecto.fechaInicio + "-02");
-      const end = new Date(proyecto.fechaFin + "-02");
+      if (!proyecto.fechaInicio || !proyecto.fechaFin) return;
+      const start = new Date(proyecto.fechaInicio);
+      const end = new Date(proyecto.fechaFin);
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) return;
+      
       const list: string[] = [];
+      let current = new Date(start.getFullYear(), start.getMonth(), 1);
+      const targetEnd = new Date(end.getFullYear(), end.getMonth(), 1);
 
-      let current = new Date(start);
-      while (current <= end) {
+      while (current <= targetEnd) {
         const year = current.getFullYear();
         const month = String(current.getMonth() + 1).padStart(2, '0');
         list.push(`${year}-${month}`);

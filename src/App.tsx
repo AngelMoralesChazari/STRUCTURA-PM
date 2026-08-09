@@ -9,6 +9,7 @@ import { ConceptosCatalogo } from './pages/ConceptosCatalogo';
 import { ProgramacionInsumos } from './pages/ProgramacionInsumos';
 import { EstimacionesGeneradores } from './pages/EstimacionesGeneradores';
 import { ReporteMaestro } from './pages/ReporteMaestro';
+import { auth } from './firebase';
 
 import { 
   Layers, 
@@ -51,6 +52,14 @@ function App() {
   const [newProjInicio, setNewProjInicio] = useState('');
   const [newProjFin, setNewProjFin] = useState('');
 
+  // Sync database mode on user change
+  useEffect(() => {
+    if (user) {
+      const isMock = user.uid.startsWith('u-');
+      dbAdapter.setMode(isMock ? 'local' : 'firebase');
+    }
+  }, [user]);
+
   // Sync projects list
   useEffect(() => {
     const unsubscribe = dbAdapter.subscribeProyectos((data) => {
@@ -62,7 +71,7 @@ function App() {
       }
     });
     return () => unsubscribe();
-  }, [selectedProject?.id]);
+  }, [selectedProject?.id, user]);
 
   // Sync project-specific sub-collections when a project is selected
   useEffect(() => {
@@ -84,7 +93,20 @@ function App() {
       unsubscribeEst();
       unsubscribeConcepts();
     };
-  }, [selectedProject?.id]);
+  }, [selectedProject?.id, user]);
+
+  const handleLogout = async () => {
+    setUser(null);
+    setSelectedProject(null);
+    if (dbAdapter.getMode() === 'firebase' && auth) {
+      try {
+        await auth.signOut();
+        console.log("Logged out of Firebase Auth successfully");
+      } catch (err) {
+        console.error("Error logging out of Firebase:", err);
+      }
+    }
+  };
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,7 +172,7 @@ function App() {
                 <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[10px] uppercase font-bold">{user.rol}</span>
               </div>
               <button
-                onClick={() => setUser(null)}
+                onClick={handleLogout}
                 className="p-2 bg-white hover:bg-slate-50 border border-light-slate text-slate-600 rounded-lg shadow-sm transition-colors"
                 title="Cerrar Sesión"
               >
@@ -506,7 +528,7 @@ function App() {
           </div>
 
           <button
-            onClick={() => setUser(null)}
+            onClick={handleLogout}
             className="w-full flex items-center justify-center gap-1.5 py-2 px-3 hover:bg-red-950/40 border border-slate-gray-700 hover:border-red-900 rounded-lg text-slate-300 hover:text-red-300 text-xs font-bold transition-all"
           >
             <LogOut size={14} />

@@ -10,7 +10,7 @@ import {
   deleteDoc,
   updateDoc
 } from 'firebase/firestore';
-import { db, isFirebaseConfigured } from '../firebase';
+import { db } from '../firebase';
 import type { 
   Proyecto, 
   CategoriaManoObra, 
@@ -72,15 +72,24 @@ const initLocalData = () => {
   }
 };
 
-// Auto-run init local
-if (!isFirebaseConfigured) {
-  initLocalData();
-}
+let currentMode: 'firebase' | 'local' = 'local';
 
 export const dbAdapter = {
+  setMode(mode: 'firebase' | 'local') {
+    currentMode = mode;
+    console.log(`dbAdapter switched to mode: ${mode}`);
+    if (mode === 'local') {
+      initLocalData();
+    }
+  },
+
+  getMode() {
+    return currentMode;
+  },
+
   // === PROYECTOS ===
   subscribeProyectos(callback: (proyectos: Proyecto[]) => void): () => void {
-    if (isFirebaseConfigured && db) {
+    if (currentMode === 'firebase' && db) {
       const q = collection(db, 'proyectos');
       return onSnapshot(q, (snapshot) => {
         const proyectos: Proyecto[] = [];
@@ -104,7 +113,7 @@ export const dbAdapter = {
   },
 
   async saveProyecto(proyecto: Proyecto): Promise<void> {
-    if (isFirebaseConfigured && db) {
+    if (currentMode === 'firebase' && db) {
       await setDoc(doc(db, 'proyectos', proyecto.id), proyecto);
     } else {
       const raw = localStorage.getItem('structura_proyectos');
@@ -122,7 +131,7 @@ export const dbAdapter = {
 
   // === TABULADOR MANO DE OBRA (FASAR) ===
   subscribeTabulador(proyectoId: string, callback: (data: CategoriaManoObra[]) => void): () => void {
-    if (isFirebaseConfigured && db) {
+    if (currentMode === 'firebase' && db) {
       const q = query(collection(db, 'tabuladores_mo'), where('proyectoId', '==', proyectoId));
       return onSnapshot(q, (snapshot) => {
         const list: CategoriaManoObra[] = [];
@@ -144,7 +153,7 @@ export const dbAdapter = {
   },
 
   async saveCategoriaManoObra(categoria: CategoriaManoObra): Promise<void> {
-    if (isFirebaseConfigured && db) {
+    if (currentMode === 'firebase' && db) {
       await setDoc(doc(db, 'tabuladores_mo', categoria.id), categoria);
     } else {
       const { proyectoId } = categoria;
@@ -166,7 +175,7 @@ export const dbAdapter = {
   },
 
   async deleteCategoriaManoObra(id: string, proyectoId: string): Promise<void> {
-    if (isFirebaseConfigured && db) {
+    if (currentMode === 'firebase' && db) {
       await deleteDoc(doc(db, 'tabuladores_mo', id));
     } else {
       const raw = localStorage.getItem('structura_tabuladores');
@@ -181,7 +190,7 @@ export const dbAdapter = {
 
   // === CONFIGURACION SOBRECOSTO ===
   async getSobrecosto(proyectoId: string): Promise<ConfiguracionSobrecosto> {
-    if (isFirebaseConfigured && db) {
+    if (currentMode === 'firebase' && db) {
       const snap = await getDoc(doc(db, 'configuracion_sobrecosto', proyectoId));
       if (snap.exists()) {
         return snap.data() as ConfiguracionSobrecosto;
@@ -221,7 +230,7 @@ export const dbAdapter = {
   },
 
   async saveSobrecosto(config: ConfiguracionSobrecosto): Promise<void> {
-    if (isFirebaseConfigured && db) {
+    if (currentMode === 'firebase' && db) {
       await setDoc(doc(db, 'configuracion_sobrecosto', config.proyectoId), config);
     } else {
       const { proyectoId } = config;
@@ -257,7 +266,7 @@ export const dbAdapter = {
 
   // === CONCEPTOS / APU ===
   subscribeConceptos(proyectoId: string, callback: (data: ConceptoObra[]) => void): () => void {
-    if (isFirebaseConfigured && db) {
+    if (currentMode === 'firebase' && db) {
       const q = collection(db, 'proyectos', proyectoId, 'conceptos');
       return onSnapshot(q, (snapshot) => {
         const list: ConceptoObra[] = [];
@@ -279,24 +288,21 @@ export const dbAdapter = {
   },
 
   async saveConcepto(proyectoId: string, concepto: ConceptoObra): Promise<void> {
-    if (isFirebaseConfigured && db) {
+    if (currentMode === 'firebase' && db) {
       await setDoc(doc(db, 'proyectos', proyectoId, 'conceptos', concepto.id), concepto);
       
       // Update Project's total budget
-      // Normally this could be done via a Cloud Function, but we can do it client-side for simplicity
       const q = collection(db, 'proyectos', proyectoId, 'conceptos');
       const querySnapshot = await getDocs(q);
       let total = 0;
       querySnapshot.forEach((doc) => {
         const c = doc.data() as ConceptoObra;
-        // Check if we are updating the current concept
         if (c.id === concepto.id) {
           total += concepto.importe;
         } else {
           total += c.importe;
         }
       });
-      // In case the collection doesn't have it yet (if it is new)
       const hasConcept = querySnapshot.docs.some(doc => doc.id === concepto.id);
       if (!hasConcept) {
         total += concepto.importe;
@@ -333,7 +339,7 @@ export const dbAdapter = {
   },
 
   async deleteConcepto(proyectoId: string, conceptoId: string): Promise<void> {
-    if (isFirebaseConfigured && db) {
+    if (currentMode === 'firebase' && db) {
       await deleteDoc(doc(db, 'proyectos', proyectoId, 'conceptos', conceptoId));
     } else {
       const raw = localStorage.getItem('structura_conceptos');
@@ -358,14 +364,13 @@ export const dbAdapter = {
 
   // === ESTIMACIONES ===
   subscribeEstimaciones(proyectoId: string, callback: (data: Estimacion[]) => void): () => void {
-    if (isFirebaseConfigured && db) {
+    if (currentMode === 'firebase' && db) {
       const q = query(collection(db, 'estimaciones'), where('proyectoId', '==', proyectoId));
       return onSnapshot(q, (snapshot) => {
         const list: Estimacion[] = [];
         snapshot.forEach((doc) => {
           list.push({ id: doc.id, ...doc.data() } as Estimacion);
         });
-        // Sort by estimate number
         list.sort((a, b) => a.numeroEstimacion - b.numeroEstimacion);
         callback(list);
       });
@@ -383,10 +388,9 @@ export const dbAdapter = {
   },
 
   async saveEstimacion(estimacion: Estimacion): Promise<void> {
-    if (isFirebaseConfigured && db) {
+    if (currentMode === 'firebase' && db) {
       await setDoc(doc(db, 'estimaciones', estimacion.id), estimacion);
       
-      // Update project's amortizadoAcumulado if approved
       if (estimacion.estado === 'Aprobada') {
         const q = query(collection(db, 'estimaciones'), where('proyectoId', '==', estimacion.proyectoId), where('estado', '==', 'Aprobada'));
         const querySnapshot = await getDocs(q);
@@ -442,7 +446,7 @@ export const dbAdapter = {
 
   // === FINIQUITO ===
   async getFiniquito(proyectoId: string): Promise<Finiquito | null> {
-    if (isFirebaseConfigured && db) {
+    if (currentMode === 'firebase' && db) {
       const snap = await getDoc(doc(db, 'finiquitos', proyectoId));
       return snap.exists() ? (snap.data() as Finiquito) : null;
     } else {
@@ -453,10 +457,9 @@ export const dbAdapter = {
   },
 
   async saveFiniquito(finiquito: Finiquito): Promise<void> {
-    if (isFirebaseConfigured && db) {
+    if (currentMode === 'firebase' && db) {
       await setDoc(doc(db, 'finiquitos', finiquito.proyectoId), finiquito);
       
-      // Update project state to Finiquitado
       const projRef = doc(db, 'proyectos', finiquito.proyectoId);
       await updateDoc(projRef, { estado: 'Finiquitado' });
     } else {
@@ -466,7 +469,6 @@ export const dbAdapter = {
       allFiniquitos[proyectoId] = finiquito;
       localStorage.setItem('structura_finiquitos', JSON.stringify(allFiniquitos));
 
-      // Update project state to Finiquitado
       const rawProj = localStorage.getItem('structura_proyectos');
       const proyectos: Proyecto[] = rawProj ? JSON.parse(rawProj) : [];
       const pIdx = proyectos.findIndex(p => p.id === proyectoId);

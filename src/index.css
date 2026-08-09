@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy-slate-900: #0f172a;
+  --color-navy-slate-800: #1e293b;
+  --color-slate-gray-700: #334155;
+  --color-slate-gray-600: #475569;
+  --color-ocean-blue: #0284c7;
+  --color-emerald-green: #15803d;
+  --color-light-slate: #e2e8f0;
+  --color-technical-gray: #f8fafc;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-technical-gray);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    color: var(--color-navy-slate-900);
+  }
+}
+
+/* Custom scrollbar styling for technical spreadsheet look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Add custom animations for micro-interactions */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.2s ease-out forwards;
+}
+
+/* Chrome, Safari, Edge, Opera: Remove spin buttons on number inputs */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox: Remove spin buttons on number inputs */
+input[type=number] {
+  -moz-appearance: textfield;
+}

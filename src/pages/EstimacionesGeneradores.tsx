@@ -12,11 +12,11 @@ interface EstimacionesGeneradoresProps {
   conceptos: ConceptoObra[];
 }
 
-export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = ({ 
-  proyecto, 
-  rol, 
-  estimaciones, 
-  conceptos 
+export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = ({
+  proyecto,
+  rol,
+  estimaciones,
+  conceptos
 }) => {
   const [finiquito, setFiniquito] = useState<Finiquito | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,8 +26,10 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
   const [selectedEstimacion, setSelectedEstimacion] = useState<Estimacion | null>(null);
 
   // New Estimation Form
+  const [numEstimacion, setNumEstimacion] = useState(1);
   const [periodoInicio, setPeriodoInicio] = useState('');
   const [periodoFin, setPeriodoFin] = useState('');
+  const [descripcion, setDescripcion] = useState('');
   const [avancesInputs, setAvancesInputs] = useState<{ [conceptoId: string]: number }>({});
   const [soporteFotos, setSoporteFotos] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
@@ -39,7 +41,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
 
   useEffect(() => {
     setLoading(true);
-    
+
     // Fetch finiquito
     const fetchFiniquito = async () => {
       try {
@@ -76,8 +78,10 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
     });
 
     setAvancesInputs(initialInputs);
+    setNumEstimacion(estimaciones.length + 1);
     setPeriodoInicio('');
     setPeriodoFin('');
+    setDescripcion('');
     setSoporteFotos([]);
     setViewState('create');
   };
@@ -106,7 +110,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
   const calculateOnTheFlyValues = () => {
     let bruto = 0;
     const advancesList: EstimacionConceptoAvance[] = conceptos.map(c => {
-      const volAnterior = getVolumenAnteriorAcumulado(c.id, estimaciones.length + 1);
+      const volAnterior = getVolumenAnteriorAcumulado(c.id, numEstimacion);
       const volActual = avancesInputs[c.id] || 0;
       const volAcumulado = volAnterior + volActual;
       const saldoVol = c.cantidadPresupuestada - volAcumulado;
@@ -147,12 +151,10 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
       return;
     }
 
-    const nextNumber = estimaciones.length + 1;
-
     const newEst: Estimacion = {
       id: 'est-' + Date.now(),
       proyectoId: proyecto.id,
-      numeroEstimacion: nextNumber,
+      numeroEstimacion: Number(numEstimacion) || 1,
       periodoInicio,
       periodoFin,
       avances: advancesList,
@@ -164,7 +166,8 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
       liquidoAPagar: Number(liquido.toFixed(2)),
       estado: rol === 'Administrador' ? 'Aprobada' : 'Borrador', // Resident creates draft, Admin approves
       fechaRegistro: new Date().toISOString(),
-      soporteFotografico: soporteFotos
+      soporteFotografico: soporteFotos,
+      descripcion: descripcion.trim() || undefined
     };
 
     setSaving(true);
@@ -209,7 +212,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
     // Devolución de retenciones (Fondo de garantía): 
     // In Mexico, the full retention is returned at final closure if there are no construction defects.
     const montoDevueltoRetenciones = totalRetenidoTotal;
-    
+
     // Balance
     const saldoFinalLiquido = totalEjecutadoReal - totalAmortizadoTotal - totalRetenidoTotal + montoDevueltoRetenciones;
 
@@ -242,11 +245,11 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
   const handleExportPDF = (est: Estimacion) => {
     const doc = new jsPDF();
     const primaryColor = [15, 23, 42]; // #0F172A (Navy Slate)
-    
+
     // Document Title
     doc.setFillColor(15, 23, 42);
     doc.rect(0, 0, 210, 35, 'F');
-    
+
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
@@ -254,7 +257,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.text(`ESTIMACIÓN N° ${est.numeroEstimacion} — ESTADO: ${est.estado.toUpperCase()}`, 15, 28);
-    
+
     // Project metadata block
     doc.setTextColor(51, 65, 85);
     doc.setFontSize(9);
@@ -262,12 +265,12 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
     doc.text("PROYECTO:", 15, 48);
     doc.setFont("helvetica", "normal");
     doc.text(proyecto.nombre, 45, 48);
-    
+
     doc.setFont("helvetica", "bold");
     doc.text("CONTRATISTA:", 15, 54);
     doc.setFont("helvetica", "normal");
     doc.text(proyecto.contratista, 45, 54);
-    
+
     doc.setFont("helvetica", "bold");
     doc.text("PERÍODO:", 15, 60);
     doc.setFont("helvetica", "normal");
@@ -332,7 +335,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
     const sigY = (doc as any).lastAutoTable.finalY + 25;
     doc.line(15, sigY, 70, sigY);
     doc.text("RESIDENTE DE OBRA", 25, sigY + 5);
-    
+
     doc.line(130, sigY, 185, sigY);
     doc.text("REPRESENTANTE LEGAL", 140, sigY + 5);
 
@@ -417,20 +420,26 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
                   <tbody className="divide-y divide-light-slate font-mono">
                     {estimaciones.map(est => (
                       <tr key={est.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="py-3 px-3 font-bold text-navy-slate-900">#{est.numeroEstimacion}</td>
+                        <td className="py-3 px-3 font-bold text-navy-slate-900">
+                          #{est.numeroEstimacion}
+                          {est.descripcion && (
+                            <span className="block text-[9px] font-sans font-normal text-slate-400 mt-0.5">
+                              {est.descripcion}
+                            </span>
+                          )}
+                        </td>
                         <td className="py-3 px-3 font-sans text-slate-600">{est.periodoInicio} al {est.periodoFin}</td>
                         <td className="py-3 px-3 text-right">{formatCurrency(est.montoBruto)}</td>
                         <td className="py-3 px-3 text-right text-emerald-green font-bold">{formatCurrency(est.liquidoAPagar)}</td>
                         <td className="py-3 px-3 text-center">
-                          <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
-                            est.estado === 'Aprobada' 
-                              ? 'bg-emerald-green/10 text-emerald-green' 
-                              : est.estado === 'Enviada' 
-                                ? 'bg-blue-100 text-blue-700' 
-                                : est.estado === 'Borrador' 
-                                  ? 'bg-slate-100 text-slate-600' 
+                          <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${est.estado === 'Aprobada'
+                              ? 'bg-emerald-green/10 text-emerald-green'
+                              : est.estado === 'Enviada'
+                                ? 'bg-blue-100 text-blue-700'
+                                : est.estado === 'Borrador'
+                                  ? 'bg-slate-100 text-slate-600'
                                   : 'bg-red-100 text-red-700'
-                          }`}>
+                            }`}>
                             {est.estado}
                           </span>
                         </td>
@@ -539,14 +548,26 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
             Registro de Avance Física y Croquis de Generadores (Estimación #{estimaciones.length + 1})
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Identificador / Notas (Opcional)</label>
+              <input
+                type="text"
+                placeholder="Ej. Extraordinaria 1, Bis, etc."
+                value={descripcion}
+                onChange={(e) => setDescripcion(e.target.value)}
+                className="w-full text-xs border border-light-slate rounded p-2 focus:outline-none focus:border-ocean-blue bg-white text-navy-slate-950 font-sans"
+              />
+            </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Número de Estimación</label>
               <input
-                type="text"
-                readOnly
-                value={`Estimación #${estimaciones.length + 1}`}
-                className="w-full text-xs border border-light-slate rounded p-2 focus:outline-none bg-slate-100 font-bold text-navy-slate-900 font-mono"
+                type="number"
+                min="1"
+                required
+                value={numEstimacion}
+                onChange={(e) => setNumEstimacion(Number(e.target.value) || 1)}
+                className="w-full text-xs border border-light-slate rounded p-2 focus:outline-none focus:border-ocean-blue bg-white font-bold text-navy-slate-900 font-mono"
               />
             </div>
             <div>
@@ -569,6 +590,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
                 className="w-full text-xs border border-light-slate rounded p-2 focus:outline-none focus:border-ocean-blue bg-slate-50 font-mono"
               />
             </div>
+
           </div>
 
           {/* Table to enter volumes */}
@@ -704,21 +726,25 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
               <span className="text-[10px] uppercase font-bold text-slate-400">Detalles de la Estimación</span>
               <h3 className="text-md font-bold text-navy-slate-900 mt-1 flex items-center gap-2">
                 <span>Estimación #{selectedEstimacion.numeroEstimacion}</span>
-                <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${
-                  selectedEstimacion.estado === 'Aprobada' 
-                    ? 'bg-emerald-green/10 text-emerald-green' 
-                    : selectedEstimacion.estado === 'Enviada' 
-                      ? 'bg-blue-100 text-blue-700' 
-                      : selectedEstimacion.estado === 'Borrador' 
-                        ? 'bg-slate-100 text-slate-600' 
+                <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${selectedEstimacion.estado === 'Aprobada'
+                    ? 'bg-emerald-green/10 text-emerald-green'
+                    : selectedEstimacion.estado === 'Enviada'
+                      ? 'bg-blue-100 text-blue-700'
+                      : selectedEstimacion.estado === 'Borrador'
+                        ? 'bg-slate-100 text-slate-600'
                         : 'bg-red-100 text-red-700'
-                }`}>
+                  }`}>
                   {selectedEstimacion.estado}
                 </span>
               </h3>
               <p className="text-xs text-slate-gray-500 font-sans mt-0.5">
                 Período: {selectedEstimacion.periodoInicio} al {selectedEstimacion.periodoFin}
               </p>
+              {selectedEstimacion.descripcion && (
+                <p className="text-xs text-navy-slate-800 font-semibold font-sans mt-1">
+                  Identificador / Notas: <span className="font-normal text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">{selectedEstimacion.descripcion}</span>
+                </p>
+              )}
             </div>
             <div className="flex gap-2">
               <button

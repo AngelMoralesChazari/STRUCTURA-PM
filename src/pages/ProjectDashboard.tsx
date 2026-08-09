@@ -323,7 +323,14 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
                 <tbody className="divide-y divide-light-slate font-mono">
                   {estimaciones.map((e) => (
                     <tr key={e.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-3 px-3 font-bold text-navy-slate-900">#{e.numeroEstimacion}</td>
+                      <td className="py-3 px-3 font-bold text-navy-slate-900">
+                        #{e.numeroEstimacion}
+                        {e.descripcion && (
+                          <span className="block text-[9px] font-sans font-normal text-slate-400 mt-0.5">
+                            {e.descripcion}
+                          </span>
+                        )}
+                      </td>
                       <td className="py-3 px-3 text-slate-gray-600 font-sans">{e.periodoInicio} al {e.periodoFin}</td>
                       <td className="py-3 px-3 text-right text-navy-slate-900">{formatCurrency(e.montoBruto)}</td>
                       <td className="py-3 px-3 text-right text-red-600">-{formatCurrency(e.amortizacionAnticipo)}</td>

@@ -103,6 +103,7 @@ export interface Estimacion {
   estado: 'Borrador' | 'Enviada' | 'Aprobada' | 'Rechazada';
   fechaRegistro: string;
   soporteFotografico: string[]; // Array of base64 strings or image urls
+  descripcion?: string; // Optional description or custom name for label identification (e.g. Extraordinaria 1, Bis)
 }
 
 export interface Finiquito {

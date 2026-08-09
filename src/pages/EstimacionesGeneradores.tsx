@@ -8,11 +8,16 @@ import 'jspdf-autotable';
 interface EstimacionesGeneradoresProps {
   proyecto: Proyecto;
   rol: string;
+  estimaciones: Estimacion[];
+  conceptos: ConceptoObra[];
 }
 
-export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = ({ proyecto, rol }) => {
-  const [estimaciones, setEstimaciones] = useState<Estimacion[]>([]);
-  const [conceptos, setConceptos] = useState<ConceptoObra[]>([]);
+export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = ({ 
+  proyecto, 
+  rol, 
+  estimaciones, 
+  conceptos 
+}) => {
   const [finiquito, setFiniquito] = useState<Finiquito | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -35,29 +40,19 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
   useEffect(() => {
     setLoading(true);
     
-    // Subscribe to concepts
-    const unsubscribeConcepts = dbAdapter.subscribeConceptos(proyecto.id, (data) => {
-      setConceptos(data);
-    });
-
-    // Subscribe to estimations
-    const unsubscribeEst = dbAdapter.subscribeEstimaciones(proyecto.id, (data) => {
-      setEstimaciones(data);
-      setLoading(false);
-    });
-
     // Fetch finiquito
     const fetchFiniquito = async () => {
-      const data = await dbAdapter.getFiniquito(proyecto.id);
-      setFiniquito(data);
+      try {
+        const data = await dbAdapter.getFiniquito(proyecto.id);
+        setFiniquito(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchFiniquito();
-
-    return () => {
-      unsubscribeConcepts();
-      unsubscribeEst();
-    };
-  }, [proyecto.id]);
+  }, [proyecto.id, estimaciones]);
 
   // Compute accumulated volumes for a concept prior to a specific estimation number
   const getVolumenAnteriorAcumulado = (conceptoId: string, currentEstNumber: number): number => {
@@ -544,7 +539,16 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
             Registro de Avance Física y Croquis de Generadores (Estimación #{estimaciones.length + 1})
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Número de Estimación</label>
+              <input
+                type="text"
+                readOnly
+                value={`Estimación #${estimaciones.length + 1}`}
+                className="w-full text-xs border border-light-slate rounded p-2 focus:outline-none bg-slate-100 font-bold text-navy-slate-900 font-mono"
+              />
+            </div>
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Fecha de Inicio del Periodo</label>
               <input

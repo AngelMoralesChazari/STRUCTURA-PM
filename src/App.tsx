@@ -345,7 +345,7 @@ function App() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-3 gap-4 items-end">
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Anticipo (%)</label>
                     <input
@@ -357,7 +357,7 @@ function App() {
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Retención Garantía (%)</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Retención Gtía. (%)</label>
                     <input
                       type="number"
                       required
@@ -444,7 +444,14 @@ function App() {
       case 'programacion':
         return <ProgramacionInsumos proyecto={selectedProject} rol={user.rol} />;
       case 'estimaciones':
-        return <EstimacionesGeneradores proyecto={selectedProject} rol={user.rol} />;
+        return (
+          <EstimacionesGeneradores 
+            proyecto={selectedProject} 
+            rol={user.rol} 
+            estimaciones={estimaciones}
+            conceptos={conceptos}
+          />
+        );
       case 'reportes':
         return <ReporteMaestro proyecto={selectedProject} />;
       default:

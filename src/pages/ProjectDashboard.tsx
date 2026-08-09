@@ -51,16 +51,33 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
   };
 
   // Prepare S-Curve Data
-  // Periods: gather all unique months from concept programacion and estimations
+  // Periods: start with the months between proyecto.fechaInicio and proyecto.fechaFin
   const periodsSet = new Set<string>();
+  
+  if (proyecto.fechaInicio && proyecto.fechaFin) {
+    const start = new Date(proyecto.fechaInicio);
+    const end = new Date(proyecto.fechaFin);
+    if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+      let current = new Date(start.getFullYear(), start.getMonth(), 1);
+      while (current <= end) {
+        const monthStr = current.toISOString().substring(0, 7); // "YYYY-MM"
+        periodsSet.add(monthStr);
+        current.setMonth(current.getMonth() + 1);
+      }
+    }
+  }
+
+  // Fallback: also gather from programming and estimations
   conceptos.forEach(c => {
     if (c.programacion) {
       Object.keys(c.programacion).forEach(p => periodsSet.add(p));
     }
   });
   approvedEstimaciones.forEach(e => {
-    const period = e.periodoFin.substring(0, 7); // "YYYY-MM"
-    periodsSet.add(period);
+    if (e.periodoFin) {
+      const period = e.periodoFin.substring(0, 7); // "YYYY-MM"
+      periodsSet.add(period);
+    }
   });
 
   const sortedPeriods = Array.from(periodsSet).sort();
@@ -132,49 +149,55 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
           </div>
         </div>
       </div>      {/* Real-time KPIs grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         {/* KPI 1: Contratado */}
-        <div className="bg-white p-6 rounded-xl border border-light-slate shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Monto Contratado Total</p>
-              <h3 className="text-3xl font-extrabold text-navy-slate-900 mt-2 font-mono">{formatCurrency(totalContratado)}</h3>
+        <div className="bg-white p-6 rounded-xl border border-light-slate shadow-sm hover:shadow-md transition-shadow min-w-0">
+          <div className="flex justify-between items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">Monto Contratado Total</p>
+              <h3 className="text-xl sm:text-2xl lg:text-xl xl:text-2xl font-black text-navy-slate-900 mt-2 font-mono truncate" title={formatCurrency(totalContratado)}>
+                {formatCurrency(totalContratado)}
+              </h3>
             </div>
-            <div className="p-2 bg-navy-slate-800/5 text-navy-slate-800 rounded-lg">
+            <div className="p-2 bg-navy-slate-800/5 text-navy-slate-800 rounded-lg shrink-0">
               <DollarSign size={20} />
             </div>
           </div>
-          <div className="mt-4 text-xs text-slate-gray-600 flex items-center gap-1.5">
-            <FileSpreadsheet size={14} />
-            <span>Basado en Catálogo de Conceptos</span>
+          <div className="mt-4 text-xs text-slate-gray-600 flex items-center gap-1.5 truncate">
+            <FileSpreadsheet size={14} className="shrink-0" />
+            <span className="truncate">Basado en Catálogo de Conceptos</span>
           </div>
         </div>
 
         {/* KPI 2: Ejercido */}
-        <div className="bg-white p-6 rounded-xl border border-light-slate shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Monto Ejercido / Estimado</p>
-              <h3 className="text-3xl font-extrabold text-emerald-green mt-2 font-mono">{formatCurrency(totalEjercido)}</h3>
+        <div className="bg-white p-6 rounded-xl border border-light-slate shadow-sm hover:shadow-md transition-shadow min-w-0">
+          <div className="flex justify-between items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">Monto Ejercido / Estimado</p>
+              <h3 className="text-xl sm:text-2xl lg:text-xl xl:text-2xl font-black text-emerald-green mt-2 font-mono truncate" title={formatCurrency(totalEjercido)}>
+                {formatCurrency(totalEjercido)}
+              </h3>
             </div>
-            <div className="p-2 bg-emerald-green/10 text-emerald-green rounded-lg">
+            <div className="p-2 bg-emerald-green/10 text-emerald-green rounded-lg shrink-0">
               <TrendingUp size={20} />
             </div>
           </div>
-          <div className="mt-4 text-xs text-slate-gray-600 flex items-center gap-1.5">
-            <CheckCircle2 size={14} className="text-emerald-green" />
-            <span>{approvedEstimaciones.length} Estimación(es) Aprobada(s)</span>
+          <div className="mt-4 text-xs text-slate-gray-600 flex items-center gap-1.5 truncate">
+            <CheckCircle2 size={14} className="text-emerald-green shrink-0" />
+            <span className="truncate">{approvedEstimaciones.length} Estimación(es) Aprobada(s)</span>
           </div>
         </div>
 
         {/* KPI 3: Avance Físico */}
-        <div className="bg-white p-6 rounded-xl border border-light-slate shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">% Avance Físico Financiero</p>
-              <h3 className="text-3xl font-extrabold text-ocean-blue mt-2 font-mono">{avanceFisico.toFixed(2)}%</h3>
+        <div className="bg-white p-6 rounded-xl border border-light-slate shadow-sm hover:shadow-md transition-shadow min-w-0">
+          <div className="flex justify-between items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">% Avance Físico Financiero</p>
+              <h3 className="text-xl sm:text-2xl lg:text-xl xl:text-2xl font-black text-ocean-blue mt-2 font-mono truncate" title={`${avanceFisico.toFixed(2)}%`}>
+                {avanceFisico.toFixed(2)}%
+              </h3>
             </div>
-            <div className="p-2 bg-ocean-blue/10 text-ocean-blue rounded-lg">
+            <div className="p-2 bg-ocean-blue/10 text-ocean-blue rounded-lg shrink-0">
               <Percent size={20} />
             </div>
           </div>
@@ -190,18 +213,20 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
         </div>
 
         {/* KPI 4: Saldo por Ejercer */}
-        <div className="bg-white p-6 rounded-xl border border-light-slate shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Saldo por Ejercer</p>
-              <h3 className="text-3xl font-extrabold text-slate-gray-600 mt-2 font-mono">{formatCurrency(saldoPorEjercer)}</h3>
+        <div className="bg-white p-6 rounded-xl border border-light-slate shadow-sm hover:shadow-md transition-shadow min-w-0">
+          <div className="flex justify-between items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">Saldo por Ejercer</p>
+              <h3 className="text-xl sm:text-2xl lg:text-xl xl:text-2xl font-black text-slate-gray-600 mt-2 font-mono truncate" title={formatCurrency(saldoPorEjercer)}>
+                {formatCurrency(saldoPorEjercer)}
+              </h3>
             </div>
-            <div className="p-2 bg-slate-100 text-slate-gray-600 rounded-lg">
+            <div className="p-2 bg-slate-100 text-slate-gray-600 rounded-lg shrink-0">
               <Calendar size={20} />
             </div>
           </div>
-          <div className="mt-4 text-xs text-slate-gray-600 flex items-center gap-1">
-            <span>Período: {proyecto.fechaInicio} al {proyecto.fechaFin}</span>
+          <div className="mt-4 text-xs text-slate-gray-600 flex items-center gap-1 truncate">
+            <span className="truncate">Período: {proyecto.fechaInicio} al {proyecto.fechaFin}</span>
           </div>
         </div>
       </div>

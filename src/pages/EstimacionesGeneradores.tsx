@@ -26,7 +26,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
   const [selectedEstimacion, setSelectedEstimacion] = useState<Estimacion | null>(null);
 
   // New Estimation Form
-  const [numEstimacion, setNumEstimacion] = useState(1);
+  const [numEstimacion, setNumEstimacion] = useState<number | ''>(1);
   const [periodoInicio, setPeriodoInicio] = useState('');
   const [periodoFin, setPeriodoFin] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -112,7 +112,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
   const calculateOnTheFlyValues = () => {
     let bruto = 0;
     const advancesList: EstimacionConceptoAvance[] = conceptos.map(c => {
-      const volAnterior = getVolumenAnteriorAcumulado(c.id, numEstimacion);
+      const volAnterior = getVolumenAnteriorAcumulado(c.id, Number(numEstimacion) || 1);
       const volActual = avancesInputs[c.id] || 0;
       const volAcumulado = volAnterior + volActual;
       const saldoVol = c.cantidadPresupuestada - volAcumulado;
@@ -619,7 +619,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
                 min="1"
                 required
                 value={numEstimacion}
-                onChange={(e) => setNumEstimacion(Number(e.target.value) || 1)}
+                onChange={(e) => setNumEstimacion(e.target.value === '' ? '' : Number(e.target.value))}
                 className="w-full text-xs border border-light-slate rounded p-2 focus:outline-none focus:border-ocean-blue bg-white font-bold text-navy-slate-900 font-mono"
               />
             </div>
@@ -666,7 +666,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
               </thead>
               <tbody className="divide-y divide-light-slate font-mono">
                 {conceptos.map(c => {
-                  const volAnterior = getVolumenAnteriorAcumulado(c.id, numEstimacion);
+                  const volAnterior = getVolumenAnteriorAcumulado(c.id, Number(numEstimacion) || 1);
                   const currentVol = avancesInputs[c.id] || 0;
                   const volAcumulado = volAnterior + currentVol;
                   const saldoVol = c.cantidadPresupuestada - volAcumulado;

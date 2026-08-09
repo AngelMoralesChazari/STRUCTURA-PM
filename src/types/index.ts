@@ -104,6 +104,7 @@ export interface Estimacion {
   fechaRegistro: string;
   soporteFotografico: string[]; // Array of base64 strings or image urls
   descripcion?: string; // Optional description or custom name for label identification (e.g. Extraordinaria 1, Bis)
+  esFiniquito?: boolean; // True if this estimation represents the project's final contractual closure (Finiquito)
 }
 
 export interface Finiquito {

@@ -30,6 +30,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
   const [periodoInicio, setPeriodoInicio] = useState('');
   const [periodoFin, setPeriodoFin] = useState('');
   const [descripcion, setDescripcion] = useState('');
+  const [esFiniquito, setEsFiniquito] = useState(false);
   const [avancesInputs, setAvancesInputs] = useState<{ [conceptoId: string]: number }>({});
   const [soporteFotos, setSoporteFotos] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
@@ -82,6 +83,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
     setPeriodoInicio('');
     setPeriodoFin('');
     setDescripcion('');
+    setEsFiniquito(false);
     setSoporteFotos([]);
     setViewState('create');
   };
@@ -167,7 +169,8 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
       estado: rol === 'Administrador' ? 'Aprobada' : 'Borrador', // Resident creates draft, Admin approves
       fechaRegistro: new Date().toISOString(),
       soporteFotografico: soporteFotos,
-      descripcion: descripcion.trim() || undefined
+      descripcion: descripcion.trim() || undefined,
+      esFiniquito: esFiniquito
     };
 
     setSaving(true);
@@ -189,6 +192,43 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
     try {
       await dbAdapter.saveEstimacion(updated);
       setSelectedEstimacion(updated);
+
+      // Auto-trigger project closure and finiquito record if this is a finiquito estimation and it gets approved!
+      if (newStatus === 'Aprobada' && est.esFiniquito) {
+        // Close project state
+        const updatedProj = { ...proyecto, estado: 'Finiquitado' as const };
+        await dbAdapter.saveProyecto(updatedProj);
+
+        // Gather approved estimations (including this newly approved one)
+        const updatedEstimaciones = estimaciones.map(e => e.id === est.id ? updated : e);
+        const approvedEsts = updatedEstimaciones.filter(e => e.estado === 'Aprobada');
+
+        const totalContratado = conceptos.reduce((sum, c) => sum + c.cantidadPresupuestada * c.precioUnitario, 0);
+        const totalEjecutadoReal = approvedEsts.reduce((sum, e) => sum + e.montoBruto, 0);
+        const totalAmortizadoTotal = approvedEsts.reduce((sum, e) => sum + e.amortizacionAnticipo, 0);
+        const totalRetenidoTotal = approvedEsts.reduce((sum, e) => sum + e.retencionGarantia, 0);
+        const montoDevueltoRetenciones = totalRetenidoTotal;
+        const saldoFinalLiquido = totalEjecutadoReal - totalAmortizadoTotal - totalRetenidoTotal + montoDevueltoRetenciones;
+
+        const newFiniquito: Finiquito = {
+          id: 'fin-' + Date.now(),
+          proyectoId: proyecto.id,
+          montoOriginal: totalContratado,
+          montoEjecutadoReal: totalEjecutadoReal,
+          montoAmortizadoTotal: totalAmortizadoTotal,
+          montoRetenidoTotal: totalRetenidoTotal,
+          montoDevueltoRetenciones,
+          saldoFinalLiquido,
+          estado: 'Firmado',
+          fechaFirma: new Date().toISOString().split('T')[0],
+          firmanteResidente,
+          firmanteContratista,
+          firmanteAuditor
+        };
+
+        await dbAdapter.saveFiniquito(newFiniquito);
+        setFiniquito(newFiniquito);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -605,14 +645,18 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
                   <th className="py-2 px-3">Descripción</th>
                   <th className="py-2 px-3 text-right w-24">Cant. Pres.</th>
                   <th className="py-2 px-3 text-right w-24">Vol. Anterior</th>
-                  <th className="py-2 px-3 text-center w-20 bg-emerald-green/5 text-emerald-green">Vol. Periodo</th>
+                  <th className="py-2 px-3 text-center w-24 bg-emerald-green/5 text-emerald-green">Vol. Periodo</th>
+                  <th className="py-2 px-3 text-right w-24">Vol. Acum.</th>
+                  <th className="py-2 px-3 text-right w-24 text-ocean-blue">Saldo Vol.</th>
                   <th className="py-2 px-3 text-right w-24">Importe ($)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-light-slate font-mono">
                 {conceptos.map(c => {
-                  const volAnterior = getVolumenAnteriorAcumulado(c.id, estimaciones.length + 1);
+                  const volAnterior = getVolumenAnteriorAcumulado(c.id, numEstimacion);
                   const currentVol = avancesInputs[c.id] || 0;
+                  const volAcumulado = volAnterior + currentVol;
+                  const saldoVol = c.cantidadPresupuestada - volAcumulado;
                   const currentImport = currentVol * c.precioUnitario;
 
                   return (
@@ -621,19 +665,23 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
                       <td className="py-2 px-3 font-sans text-slate-700 max-w-xs truncate text-left" title={c.descripcion}>
                         {c.descripcion}
                       </td>
-                      <td className="py-2 px-3 text-right text-slate-500">{c.cantidadPresupuestada}</td>
+                      <td className="py-2 px-3 text-right text-slate-500">{c.cantidadPresupuestada.toFixed(2)}</td>
                       <td className="py-2 px-3 text-right text-slate-500">{volAnterior.toFixed(2)}</td>
                       <td className="py-2 px-3 bg-emerald-green/5">
                         <input
                           type="number"
                           step="0.01"
                           min="0"
-                          max={c.cantidadPresupuestada - volAnterior} // Prevent over-estimation of quantities
+                          max={Number((c.cantidadPresupuestada - volAnterior).toFixed(2))} // Prevent over-estimation of quantities
                           value={avancesInputs[c.id] === 0 ? '' : avancesInputs[c.id]}
                           onChange={(e) => handleVolumeChange(c.id, e.target.value)}
                           className="w-full text-right text-xs border border-light-slate rounded px-1.5 py-0.5 bg-white font-mono text-emerald-700 font-bold"
                           placeholder="0.00"
                         />
+                      </td>
+                      <td className="py-2 px-3 text-right font-semibold text-slate-700">{volAcumulado.toFixed(2)}</td>
+                      <td className={`py-2 px-3 text-right font-bold ${saldoVol < 0.01 ? 'text-slate-300' : 'text-ocean-blue'}`}>
+                        {saldoVol.toFixed(2)}
                       </td>
                       <td className="py-2 px-3 text-right font-bold text-navy-slate-900">{formatCurrency(currentImport)}</td>
                     </tr>
@@ -681,20 +729,52 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
             )}
           </div>
 
+          {/* Toggle Es Finiquito */}
+          <div className="flex items-center gap-2.5 p-3.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 text-xs">
+            <input
+              type="checkbox"
+              id="esFiniquito"
+              checked={esFiniquito}
+              onChange={(e) => setEsFiniquito(e.target.checked)}
+              className="w-4 h-4 text-ocean-blue focus:ring-ocean-blue border-light-slate rounded cursor-pointer"
+            />
+            <div>
+              <label htmlFor="esFiniquito" className="font-bold cursor-pointer select-none">
+                ¿Esta estimación representa el Finiquito final y Cierre contractual de la obra?
+              </label>
+              <p className="text-[10px] text-amber-700 mt-0.5">
+                Al ser aprobada por la supervisión/administrador, se congelará el catálogo para evitar cobros futuros y se generará el balance final.
+              </p>
+            </div>
+          </div>
+
           {/* Live Calculations Panel */}
           {(() => {
-            const { bruto, amortizacion, retencion, liquido } = calculateOnTheFlyValues();
+            const { bruto, amortizacion, retencion, subtotal, iva, liquido } = calculateOnTheFlyValues();
             return (
-              <div className="bg-navy-slate-900 text-white p-5 rounded-xl border border-slate-gray-800 flex justify-between gap-4 font-mono text-xs">
-                <div className="space-y-1">
-                  <p className="font-sans text-[10px] font-bold text-slate-400">DESGLOSE DEL COBRO DE ESTIMACIÓN</p>
-                  <p>Monto Estimado Bruto: {formatCurrency(bruto)}</p>
-                  <p className="text-red-400">Amortización Anticipo ({proyecto.anticipoPorcentaje}%): -{formatCurrency(amortizacion)}</p>
-                  <p className="text-slate-400">Retención Garantía ({proyecto.retencionPorcentaje}%): -{formatCurrency(retencion)}</p>
+              <div className="bg-navy-slate-900 text-white p-5 rounded-xl border border-slate-gray-800 flex flex-col sm:flex-row justify-between gap-4 font-mono text-xs">
+                <div className="space-y-1.5 flex-1">
+                  <p className="font-sans text-[10px] font-bold text-slate-400 uppercase tracking-wider">Desglose del Cobro de Estimación</p>
+                  <div className="grid grid-cols-2 gap-x-8 max-w-sm">
+                    <span className="text-slate-300">Monto Estimado Bruto:</span>
+                    <span className="font-bold text-right">{formatCurrency(bruto)}</span>
+                    
+                    <span className="text-red-400">Amortización Anticipo ({proyecto.anticipoPorcentaje}%):</span>
+                    <span className="text-red-400 text-right">-{formatCurrency(amortizacion)}</span>
+                    
+                    <span className="text-amber-400">Retención Garantía ({proyecto.retencionPorcentaje}%):</span>
+                    <span className="text-amber-400 text-right">-{formatCurrency(retencion)}</span>
+                    
+                    <span className="text-slate-400 border-t border-slate-700 mt-1 pt-1">Subtotal (Neto):</span>
+                    <span className="text-slate-200 text-right border-t border-slate-700 mt-1 pt-1 font-bold">{formatCurrency(subtotal)}</span>
+                    
+                    <span className="text-slate-400">IVA (+{proyecto.ivaPorcentaje}%):</span>
+                    <span className="text-slate-200 text-right font-bold">+{formatCurrency(iva)}</span>
+                  </div>
                 </div>
-                <div className="text-right flex flex-col justify-end">
-                  <p className="text-[10px] font-sans text-slate-400 uppercase">LÍQUIDO A PAGAR CON IVA (+{proyecto.ivaPorcentaje}%)</p>
-                  <p className="text-2xl font-bold font-mono text-emerald-400">{formatCurrency(liquido)}</p>
+                <div className="text-right sm:border-l sm:border-slate-800 sm:pl-6 shrink-0 flex flex-col justify-center">
+                  <p className="text-[10px] font-sans text-slate-400 uppercase tracking-wider">Líquido a Pagar Final</p>
+                  <p className="text-3xl font-extrabold text-emerald-400 mt-1">{formatCurrency(liquido)}</p>
                 </div>
               </div>
             );
@@ -818,8 +898,8 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
           )}
 
           {/* Financial summary calculations */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-slate-50 p-4 border border-light-slate rounded-lg font-mono text-xs space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
+            <div className="bg-slate-50 p-4 border border-light-slate rounded-lg space-y-2">
               <div className="flex justify-between">
                 <span>MONTO BRUTO ESTIMADO:</span>
                 <span className="font-bold">{formatCurrency(selectedEstimacion.montoBruto)}</span>
@@ -828,20 +908,23 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
                 <span>AMORTIZACIÓN DE ANTICIPO ({proyecto.anticipoPorcentaje}%):</span>
                 <span>-{formatCurrency(selectedEstimacion.amortizacionAnticipo)}</span>
               </div>
-              <div className="flex justify-between text-slate-600">
+              <div className="flex justify-between text-amber-600">
                 <span>RETENCIÓN DE GARANTÍA ({proyecto.retencionPorcentaje}%):</span>
                 <span>-{formatCurrency(selectedEstimacion.retencionGarantia)}</span>
               </div>
-              <div className="flex justify-between border-t border-dashed border-light-slate pt-2 font-bold text-navy-slate-950">
-                <span>SUBTOTAL:</span>
+              <div className="flex justify-between border-t border-light-slate pt-2 font-bold text-navy-slate-950">
+                <span>SUBTOTAL (NETO):</span>
                 <span>{formatCurrency(selectedEstimacion.subtotal)}</span>
+              </div>
+              <div className="flex justify-between text-slate-500">
+                <span>IVA (+{proyecto.ivaPorcentaje}%):</span>
+                <span>+{formatCurrency(selectedEstimacion.iva)}</span>
               </div>
             </div>
 
-            <div className="bg-navy-slate-900 text-white p-5 rounded-xl border border-slate-gray-800 flex flex-col justify-center text-right font-mono">
-              <span className="text-[10px] text-slate-400 font-sans block">LÍQUIDO NETO AUTORIZADO (CON IVA)</span>
+            <div className="bg-navy-slate-900 text-white p-5 rounded-xl border border-slate-gray-800 flex flex-col justify-center text-right">
+              <span className="text-[10px] text-slate-400 font-sans block uppercase tracking-wider">Líquido Neto Autorizado</span>
               <span className="text-3xl font-extrabold text-emerald-400 mt-1">{formatCurrency(selectedEstimacion.liquidoAPagar)}</span>
-              <span className="text-[9px] text-slate-400 mt-1">IVA: {formatCurrency(selectedEstimacion.iva)}</span>
             </div>
           </div>
         </div>

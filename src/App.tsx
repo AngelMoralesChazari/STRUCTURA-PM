@@ -452,26 +452,18 @@ function App() {
     }
   };
 
-  const navItems = [
-    { id: 'dashboard', label: 'Panel de Control', icon: <TrendingUp size={16} /> },
-    { id: 'fasar', label: 'FASAR & Mano de Obra', icon: <Hammer size={16} /> },
-    { id: 'sobrecosto', label: 'Análisis de Sobrecosto', icon: <Percent size={16} /> },
-    { id: 'apu', label: 'Matriz APU & Catálogo', icon: <Layers size={16} /> },
-    { id: 'programacion', label: 'Programación e Insumos', icon: <Calendar size={16} /> },
-    { id: 'estimaciones', label: 'Estimaciones y Finiquito', icon: <FileSpreadsheet size={16} /> },
-    { id: 'reportes', label: 'Reporte Maestro (Cierre)', icon: <FileText size={16} /> }
-  ];
-
   return (
     <div className="h-screen w-screen flex bg-technical-gray text-navy-slate-900 font-sans overflow-hidden">
       {/* 1. LEFT SIDEBAR (Navy Slate) */}
-      <aside className="w-64 bg-navy-slate-900 text-white flex flex-col justify-between border-r border-slate-gray-700 shrink-0">
+      <aside className="w-72 bg-navy-slate-900 text-white flex flex-col justify-between border-r border-slate-gray-700 shrink-0">
         <div className="space-y-6">
           {/* Brand Header */}
-          <div className="p-5 border-b border-slate-gray-700 flex items-center gap-2">
-            <Building2 size={24} className="text-ocean-blue stroke-[1.8]" />
+          <div className="p-6 border-b border-slate-gray-700 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-ocean-blue flex items-center justify-center font-black text-lg text-white shadow-md shadow-ocean-blue/20 shrink-0">
+              SPM
+            </div>
             <div>
-              <span className="font-extrabold text-sm tracking-tight block">STRUCTURA-PM</span>
+              <span className="font-extrabold text-base tracking-tight block text-white leading-tight">STRUCTURA-PM</span>
               <span className="text-[9px] text-slate-400 uppercase tracking-widest font-bold font-mono">Cost Management</span>
             </div>
           </div>
@@ -480,48 +472,128 @@ function App() {
           <div className="px-4">
             <button
               onClick={() => setSelectedProject(null)}
-              className="w-full flex items-center justify-between p-2.5 bg-navy-slate-800 hover:bg-navy-slate-800/80 border border-slate-gray-700 rounded-lg text-slate-200 text-xs font-semibold transition-colors group"
+              className="w-full flex items-center justify-between p-3 bg-navy-slate-800 hover:bg-navy-slate-800/80 border border-slate-gray-700 rounded-lg text-slate-200 text-xs font-bold transition-all group shadow-inner"
             >
-              <div className="flex items-center gap-2 overflow-hidden">
-                <FolderGit2 size={15} className="text-ocean-blue shrink-0" />
-                <span className="truncate text-left" title={selectedProject.nombre}>{selectedProject.nombre}</span>
+              <div className="flex items-center gap-2.5 overflow-hidden">
+                <FolderGit2 size={16} className="text-ocean-blue shrink-0" />
+                <span className="truncate text-left font-semibold text-slate-200" title={selectedProject.nombre}>{selectedProject.nombre}</span>
               </div>
-              <span className="text-[9px] font-bold text-slate-400 group-hover:text-white shrink-0 ml-1">Cambiar</span>
+              <span className="text-[9px] font-bold text-slate-400 group-hover:text-white shrink-0 ml-2 bg-slate-700 px-1.5 py-0.5 rounded">Cambiar</span>
             </button>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="px-3 space-y-1">
-            {navItems.map((item) => {
-              const isActive = activeTab === item.id;
-              return (
+          {/* Navigation Links categorized like Image 2 */}
+          <nav className="px-4 space-y-5 overflow-y-auto max-h-[calc(100vh-280px)]">
+            {/* GENERAL CATEGORY */}
+            <div>
+              <div className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest px-3 mb-2">General</div>
+              <div className="space-y-1">
                 <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 text-xs font-medium rounded-lg transition-colors text-left ${
-                    isActive 
-                      ? 'bg-ocean-blue text-white shadow-sm font-semibold' 
+                  onClick={() => setActiveTab('dashboard')}
+                  className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-lg transition-colors text-left ${
+                    activeTab === 'dashboard'
+                      ? 'bg-ocean-blue text-white shadow-sm font-bold'
                       : 'text-slate-300 hover:bg-navy-slate-800/60 hover:text-white'
                   }`}
                 >
-                  <span className={isActive ? 'text-white' : 'text-slate-400'}>{item.icon}</span>
-                  {item.label}
+                  <TrendingUp size={19} className={activeTab === 'dashboard' ? 'text-white' : 'text-slate-400'} />
+                  Panel de Control
                 </button>
-              );
-            })}
+              </div>
+            </div>
+
+            {/* INGENIERIA Y COSTOS CATEGORY */}
+            <div>
+              <div className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest px-3 mb-2">Ingeniería & Costos</div>
+              <div className="space-y-1">
+                <button
+                  onClick={() => setActiveTab('fasar')}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${
+                    activeTab === 'fasar'
+                      ? 'bg-ocean-blue text-white shadow-sm font-bold'
+                      : 'text-slate-300 hover:bg-navy-slate-800/60 hover:text-white'
+                  }`}
+                >
+                  <Hammer size={19} className={activeTab === 'fasar' ? 'text-white' : 'text-slate-400'} />
+                  FASAR & Mano de Obra
+                </button>
+                <button
+                  onClick={() => setActiveTab('sobrecosto')}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${
+                    activeTab === 'sobrecosto'
+                      ? 'bg-ocean-blue text-white shadow-sm font-bold'
+                      : 'text-slate-300 hover:bg-navy-slate-800/60 hover:text-white'
+                  }`}
+                >
+                  <Percent size={19} className={activeTab === 'sobrecosto' ? 'text-white' : 'text-slate-400'} />
+                  Análisis de Sobrecosto
+                </button>
+                <button
+                  onClick={() => setActiveTab('apu')}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${
+                    activeTab === 'apu'
+                      ? 'bg-ocean-blue text-white shadow-sm font-bold'
+                      : 'text-slate-300 hover:bg-navy-slate-800/60 hover:text-white'
+                  }`}
+                >
+                  <Layers size={19} className={activeTab === 'apu' ? 'text-white' : 'text-slate-400'} />
+                  Matriz APU & Catálogo
+                </button>
+                <button
+                  onClick={() => setActiveTab('programacion')}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${
+                    activeTab === 'programacion'
+                      ? 'bg-ocean-blue text-white shadow-sm font-bold'
+                      : 'text-slate-300 hover:bg-navy-slate-800/60 hover:text-white'
+                  }`}
+                >
+                  <Calendar size={19} className={activeTab === 'programacion' ? 'text-white' : 'text-slate-400'} />
+                  Programación e Insumos
+                </button>
+              </div>
+            </div>
+
+            {/* CONTROL DE OBRA CATEGORY */}
+            <div>
+              <div className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest px-3 mb-2">Control de Obra</div>
+              <div className="space-y-1">
+                <button
+                  onClick={() => setActiveTab('estimaciones')}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${
+                    activeTab === 'estimaciones'
+                      ? 'bg-ocean-blue text-white shadow-sm font-bold'
+                      : 'text-slate-300 hover:bg-navy-slate-800/60 hover:text-white'
+                  }`}
+                >
+                  <FileSpreadsheet size={19} className={activeTab === 'estimaciones' ? 'text-white' : 'text-slate-400'} />
+                  Estimaciones y Finiquito
+                </button>
+                <button
+                  onClick={() => setActiveTab('reportes')}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${
+                    activeTab === 'reportes'
+                      ? 'bg-ocean-blue text-white shadow-sm font-bold'
+                      : 'text-slate-300 hover:bg-navy-slate-800/60 hover:text-white'
+                  }`}
+                >
+                  <FileText size={19} className={activeTab === 'reportes' ? 'text-white' : 'text-slate-400'} />
+                  Reporte Maestro (Cierre)
+                </button>
+              </div>
+            </div>
           </nav>
         </div>
 
         {/* Sidebar Footer */}
         <div className="p-4 border-t border-slate-gray-700 space-y-4">
           {/* User profile info */}
-          <div className="flex items-center gap-2.5 bg-navy-slate-800/40 p-2.5 rounded-lg border border-slate-gray-800">
-            <div className="w-7 h-7 rounded-full bg-ocean-blue/20 text-ocean-blue flex items-center justify-center border border-ocean-blue/30 text-xs font-bold font-mono">
+          <div className="flex items-center gap-3 bg-navy-slate-800/60 p-3 rounded-lg border border-slate-gray-800">
+            <div className="w-9 h-9 rounded-full bg-ocean-blue/20 text-ocean-blue flex items-center justify-center border border-ocean-blue/30 text-sm font-black font-mono shrink-0">
               {user.nombre[0]}
             </div>
             <div className="overflow-hidden">
-              <span className="block text-[10px] font-bold text-white truncate">{user.nombre}</span>
-              <span className="inline-flex px-1.5 py-0.2 rounded bg-slate-700 text-slate-300 text-[8px] uppercase tracking-wider font-extrabold mt-0.5">
+              <span className="block text-xs font-bold text-white truncate leading-snug">{user.nombre}</span>
+              <span className="inline-flex px-2 py-0.5 rounded bg-slate-700 text-slate-300 text-[8px] uppercase tracking-wider font-extrabold mt-1">
                 {user.rol}
               </span>
             </div>
@@ -529,9 +601,9 @@ function App() {
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-1.5 py-2 px-3 hover:bg-red-950/40 border border-slate-gray-700 hover:border-red-900 rounded-lg text-slate-300 hover:text-red-300 text-xs font-bold transition-all"
+            className="w-full flex items-center justify-center gap-2 py-2.5 px-3 hover:bg-red-950/40 border border-slate-gray-700 hover:border-red-900 rounded-lg text-slate-300 hover:text-red-300 text-xs font-bold transition-all"
           >
-            <LogOut size={14} />
+            <LogOut size={15} />
             Cerrar Sesión
           </button>
         </div>

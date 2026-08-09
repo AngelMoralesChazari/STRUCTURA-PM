@@ -131,16 +131,14 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
             </span>
           </div>
         </div>
-      </div>
-
-      {/* Real-time KPIs grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      </div>      {/* Real-time KPIs grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* KPI 1: Contratado */}
-        <div className="bg-white p-5 rounded-xl border border-light-slate shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 rounded-xl border border-light-slate shadow-sm hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Monto Contratado Total</p>
-              <h3 className="text-xl font-bold text-navy-slate-900 mt-2 font-mono">{formatCurrency(totalContratado)}</h3>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Monto Contratado Total</p>
+              <h3 className="text-3xl font-extrabold text-navy-slate-900 mt-2 font-mono">{formatCurrency(totalContratado)}</h3>
             </div>
             <div className="p-2 bg-navy-slate-800/5 text-navy-slate-800 rounded-lg">
               <DollarSign size={20} />
@@ -153,11 +151,11 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
         </div>
 
         {/* KPI 2: Ejercido */}
-        <div className="bg-white p-5 rounded-xl border border-light-slate shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 rounded-xl border border-light-slate shadow-sm hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Monto Ejercido / Estimado</p>
-              <h3 className="text-xl font-bold text-emerald-green mt-2 font-mono">{formatCurrency(totalEjercido)}</h3>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Monto Ejercido / Estimado</p>
+              <h3 className="text-3xl font-extrabold text-emerald-green mt-2 font-mono">{formatCurrency(totalEjercido)}</h3>
             </div>
             <div className="p-2 bg-emerald-green/10 text-emerald-green rounded-lg">
               <TrendingUp size={20} />
@@ -170,11 +168,11 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
         </div>
 
         {/* KPI 3: Avance Físico */}
-        <div className="bg-white p-5 rounded-xl border border-light-slate shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 rounded-xl border border-light-slate shadow-sm hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">% Avance Físico Financiero</p>
-              <h3 className="text-xl font-bold text-ocean-blue mt-2 font-mono">{avanceFisico.toFixed(2)}%</h3>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">% Avance Físico Financiero</p>
+              <h3 className="text-3xl font-extrabold text-ocean-blue mt-2 font-mono">{avanceFisico.toFixed(2)}%</h3>
             </div>
             <div className="p-2 bg-ocean-blue/10 text-ocean-blue rounded-lg">
               <Percent size={20} />
@@ -192,11 +190,11 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
         </div>
 
         {/* KPI 4: Saldo por Ejercer */}
-        <div className="bg-white p-5 rounded-xl border border-light-slate shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 rounded-xl border border-light-slate shadow-sm hover:shadow-md transition-shadow">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Saldo por Ejercer</p>
-              <h3 className="text-xl font-bold text-slate-gray-600 mt-2 font-mono">{formatCurrency(saldoPorEjercer)}</h3>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Saldo por Ejercer</p>
+              <h3 className="text-3xl font-extrabold text-slate-gray-600 mt-2 font-mono">{formatCurrency(saldoPorEjercer)}</h3>
             </div>
             <div className="p-2 bg-slate-100 text-slate-gray-600 rounded-lg">
               <Calendar size={20} />
@@ -216,7 +214,7 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
         </h3>
         
         {chartData.length > 0 ? (
-          <div className="h-80 w-full">
+          <div className="h-[400px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={chartData}
@@ -266,7 +264,7 @@ export const ProjectDashboard: React.FC<ProjectDashboardProps> = ({
             </ResponsiveContainer>
           </div>
         ) : (
-          <div className="h-60 flex flex-col items-center justify-center border border-dashed border-light-slate rounded-lg text-slate-400">
+          <div className="h-[400px] flex flex-col items-center justify-center border border-dashed border-light-slate rounded-lg text-slate-400">
             <Calendar size={36} className="mb-2 stroke-1" />
             <p className="text-sm">Configura la programación de conceptos para ver la Curva S.</p>
           </div>

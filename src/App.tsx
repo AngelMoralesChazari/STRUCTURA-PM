@@ -463,7 +463,7 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen flex bg-technical-gray text-navy-slate-900 font-sans">
+    <div className="h-screen w-screen flex bg-technical-gray text-navy-slate-900 font-sans overflow-hidden">
       {/* 1. LEFT SIDEBAR (Navy Slate) */}
       <aside className="w-64 bg-navy-slate-900 text-white flex flex-col justify-between border-r border-slate-gray-700 shrink-0">
         <div className="space-y-6">
@@ -538,7 +538,7 @@ function App() {
       </aside>
 
       {/* 2. RIGHT MAIN SHELL CONTENT */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {/* Top Navbar */}
         <header className="h-14 bg-white border-b border-light-slate px-6 flex justify-between items-center shrink-0 shadow-sm">
           <div className="flex items-center gap-2">

@@ -404,7 +404,7 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
       </div>
 
       {/* Preview Section */}
-      <div className="bg-white rounded-xl border border-light-slate shadow-sm p-8 max-w-4xl mx-auto space-y-8 animate-slide-in relative">
+      <div className="bg-white rounded-xl border border-light-slate shadow-sm p-8 w-full max-w-6xl mx-auto space-y-8 animate-slide-in relative">
         {/* Decorative corner tag */}
         <div className="absolute top-0 right-0 bg-navy-slate-900 text-white px-4 py-1.5 rounded-bl-lg font-mono text-[9px] font-bold tracking-widest uppercase">
           Previsualización de Reporte

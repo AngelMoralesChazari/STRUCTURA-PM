@@ -485,6 +485,15 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
                         </td>
                         <td className="py-3 px-3 text-center">
                           <div className="flex justify-center gap-1.5">
+                            {rol === 'Administrador' && est.estado === 'Borrador' && (
+                              <button
+                                onClick={() => handleUpdateStatus(est, 'Aprobada')}
+                                className="p-1 hover:bg-emerald-50 rounded text-emerald-600 transition-colors"
+                                title="Aprobar Estimación directamente"
+                              >
+                                <CheckCircle size={14} />
+                              </button>
+                            )}
                             <button
                               onClick={() => {
                                 setSelectedEstimacion(est);
@@ -565,7 +574,11 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
                   </p>
                   <div className="p-3 bg-amber-50 rounded border border-amber-200 text-amber-800 text-[11px] leading-relaxed">
                     <span>
-                      El proyecto permanece en ejecución. El administrador puede declarar el finiquito del contrato cuando las estimaciones hayan cubierto el 100% de la obra física.
+                      {rol === 'Administrador' ? (
+                        <strong>Como Administrador de la obra, tienes los permisos necesarios para declarar el finiquito y conciliar el cierre del contrato.</strong>
+                      ) : (
+                        <span>El proyecto permanece en ejecución. El administrador podrá declarar el finiquito del contrato cuando las estimaciones hayan cubierto el 100% de la obra física.</span>
+                      )}
                     </span>
                   </div>
                 </div>

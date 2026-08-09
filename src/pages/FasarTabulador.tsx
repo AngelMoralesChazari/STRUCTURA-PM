@@ -15,9 +15,9 @@ export const FasarTabulador: React.FC<FasarTabuladorProps> = ({ proyecto, rol })
   
   // Form for new worker
   const [newCategoria, setNewCategoria] = useState('');
-  const [newSbc, setNewSbc] = useState(300);
-  const [newFs, setNewFs] = useState(1.282); // tp/tl
-  const [newIps, setNewIps] = useState(100); // IMSS + Infonavit + Impuesto sobre nómina, etc.
+  const [newSbc, setNewSbc] = useState<number | ''>(300);
+  const [newFs, setNewFs] = useState<number | ''>(1.282); // tp/tl
+  const [newIps, setNewIps] = useState<number | ''>(100); // IMSS + Infonavit + Impuesto sobre nómina, etc.
 
   const [saving, setSaving] = useState(false);
   const [showHelper, setShowHelper] = useState(false);
@@ -38,16 +38,20 @@ export const FasarTabulador: React.FC<FasarTabuladorProps> = ({ proyecto, rol })
     // Math formulas:
     // FASAR = Fs + (Ips / SBC)
     // SR = SBC * FASAR
-    const fasar = Number((newFs + (newIps / newSbc)).toFixed(4));
-    const sr = Number((newSbc * fasar).toFixed(2));
+    const sbcNum = Number(newSbc) || 1;
+    const fsNum = Number(newFs) || 0;
+    const ipsNum = Number(newIps) || 0;
+    
+    const fasar = Number((fsNum + (ipsNum / sbcNum)).toFixed(4));
+    const sr = Number((sbcNum * fasar).toFixed(2));
 
     const newRow: CategoriaManoObra = {
       id: 'mo-' + Date.now(),
       proyectoId: proyecto.id,
       categoria: newCategoria,
-      sbc: newSbc,
-      fs: newFs,
-      ips: newIps,
+      sbc: sbcNum,
+      fs: fsNum,
+      ips: ipsNum,
       fasar,
       sr
     };
@@ -94,7 +98,8 @@ export const FasarTabulador: React.FC<FasarTabuladorProps> = ({ proyecto, rol })
     }
   };
 
-  const handleFieldChange = (id: string, field: keyof CategoriaManoObra, value: any) => {
+  const handleFieldChange = (id: string, field: keyof CategoriaManoObra, valueStr: string) => {
+    const value = valueStr === '' ? '' : Number(valueStr);
     setTabulador(prev => prev.map(item => {
       if (item.id === id) {
         const updated = { ...item, [field]: value };
@@ -201,7 +206,7 @@ export const FasarTabulador: React.FC<FasarTabuladorProps> = ({ proyecto, rol })
                     step="0.01"
                     required
                     value={newSbc}
-                    onChange={(e) => setNewSbc(Number(e.target.value))}
+                    onChange={(e) => setNewSbc(e.target.value === '' ? '' : Number(e.target.value))}
                     className="w-full text-xs border border-light-slate rounded pl-6 pr-2 py-2 focus:outline-none focus:border-ocean-blue bg-slate-50 font-mono"
                   />
                 </div>
@@ -218,7 +223,7 @@ export const FasarTabulador: React.FC<FasarTabuladorProps> = ({ proyecto, rol })
                   step="0.001"
                   required
                   value={newFs}
-                  onChange={(e) => setNewFs(Number(e.target.value))}
+                  onChange={(e) => setNewFs(e.target.value === '' ? '' : Number(e.target.value))}
                   className="w-full text-xs border border-light-slate rounded p-2 focus:outline-none focus:border-ocean-blue bg-slate-50 font-mono"
                 />
               </div>
@@ -236,23 +241,23 @@ export const FasarTabulador: React.FC<FasarTabuladorProps> = ({ proyecto, rol })
                     step="0.01"
                     required
                     value={newIps}
-                    onChange={(e) => setNewIps(Number(e.target.value))}
+                    onChange={(e) => setNewIps(e.target.value === '' ? '' : Number(e.target.value))}
                     className="w-full text-xs border border-light-slate rounded pl-6 pr-2 py-2 focus:outline-none focus:border-ocean-blue bg-slate-50 font-mono"
                   />
                 </div>
               </div>
 
-              <div className="bg-slate-50 p-3 rounded border border-light-slate text-xs space-y-1.5">
+              <div className="bg-slate-50 p-3 rounded border border-light-slate text-xs space-y-1.5 font-mono">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">FASAR Calculado:</span>
-                  <span className="font-bold text-navy-slate-900 font-mono">
-                    {(newFs + (newIps / newSbc)).toFixed(4)}
+                  <span className="text-slate-400 font-sans">FASAR Calculado:</span>
+                  <span className="font-bold text-navy-slate-900">
+                    {(Number(newFs) + (Number(newIps) / (Number(newSbc) || 1))).toFixed(4)}
                   </span>
                 </div>
                 <div className="flex justify-between border-t border-dashed border-light-slate pt-1.5">
-                  <span className="text-slate-400">Salario Real (SR):</span>
-                  <span className="font-bold text-emerald-green font-mono">
-                    {formatCurrency(newSbc * (newFs + (newIps / newSbc)))}
+                  <span className="text-slate-400 font-sans">Salario Real (SR):</span>
+                  <span className="font-bold text-emerald-green">
+                    {formatCurrency(Number(newSbc) * (Number(newFs) + (Number(newIps) / (Number(newSbc) || 1))))}
                   </span>
                 </div>
               </div>
@@ -322,8 +327,8 @@ export const FasarTabulador: React.FC<FasarTabuladorProps> = ({ proyecto, rol })
                             <input
                               type="number"
                               value={worker.sbc}
-                              onChange={(e) => handleFieldChange(worker.id, 'sbc', Number(e.target.value))}
-                              className="w-20 text-right text-xs border border-light-slate rounded p-1 bg-white"
+                              onChange={(e) => handleFieldChange(worker.id, 'sbc', e.target.value)}
+                              className="w-20 text-right text-xs border border-light-slate rounded p-1 bg-white font-mono"
                             />
                           ) : (
                             formatCurrency(worker.sbc)
@@ -335,8 +340,8 @@ export const FasarTabulador: React.FC<FasarTabuladorProps> = ({ proyecto, rol })
                               type="number"
                               step="0.001"
                               value={worker.fs}
-                              onChange={(e) => handleFieldChange(worker.id, 'fs', Number(e.target.value))}
-                              className="w-16 text-right text-xs border border-light-slate rounded p-1 bg-white"
+                              onChange={(e) => handleFieldChange(worker.id, 'fs', e.target.value)}
+                              className="w-16 text-right text-xs border border-light-slate rounded p-1 bg-white font-mono"
                             />
                           ) : (
                             worker.fs.toFixed(3)
@@ -347,8 +352,8 @@ export const FasarTabulador: React.FC<FasarTabuladorProps> = ({ proyecto, rol })
                             <input
                               type="number"
                               value={worker.ips}
-                              onChange={(e) => handleFieldChange(worker.id, 'ips', Number(e.target.value))}
-                              className="w-16 text-right text-xs border border-light-slate rounded p-1 bg-white"
+                              onChange={(e) => handleFieldChange(worker.id, 'ips', e.target.value)}
+                              className="w-16 text-right text-xs border border-light-slate rounded p-1 bg-white font-mono"
                             />
                           ) : (
                             formatCurrency(worker.ips)

@@ -38,7 +38,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
   // Finiquito signatures
   const [firmanteResidente, setFirmanteResidente] = useState('Ing. Sofía Morales');
   const [firmanteContratista, setFirmanteContratista] = useState('Ing. Angel Morales Chazari');
-  const [firmanteAuditor, setFirmanteAuditor] = useState('Mtro. Fernando Ortiz');
+  const [firmanteAuditor, setFirmanteAuditor] = useState('Dr. Severino Feliciano Morales');
 
   useEffect(() => {
     setLoading(true);

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Usuario, UserRole } from '../types';
-import { Shield, Hammer, Eye, Key, Mail } from 'lucide-react';
+import { Shield, Hammer, Eye, EyeOff, Key, Mail } from 'lucide-react';
 import { isFirebaseConfigured, auth } from '../firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 
@@ -13,6 +13,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleFirebaseLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +28,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       if (isFirebaseConfigured && auth) {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const fbUser = userCredential.user;
-        
+
         // In real app, you would fetch role from Firestore user doc.
         // For demonstration, we'll assign role based on email keyword or default to Admin.
         let rol: UserRole = 'Administrador';
@@ -55,7 +56,7 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     const mockUsers: Record<UserRole, Usuario> = {
       'Administrador': { uid: 'u-admin', email: 'admin@structura.com', nombre: 'Ing. Alejandro Ruiz', rol: 'Administrador' },
       'Residente': { uid: 'u-resident', email: 'residente@structura.com', nombre: 'Ing. Sofía Morales', rol: 'Residente' },
-      'Auditor': { uid: 'u-auditor', email: 'auditor@structura.com', nombre: 'Mtro. Fernando Ortiz', rol: 'Auditor' }
+      'Auditor': { uid: 'u-auditor', email: 'auditor@structura.com', nombre: 'Dr. Severino Feliciano Morales', rol: 'Auditor' }
     };
     onLoginSuccess(mockUsers[rol]);
   };
@@ -115,12 +116,19 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 <Key size={16} />
               </span>
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 bg-navy-slate-900 border border-slate-gray-700 rounded text-white placeholder-slate-500 focus:outline-none focus:border-ocean-blue text-sm transition-colors"
+                className="w-full pl-9 pr-10 py-2 bg-navy-slate-900 border border-slate-gray-700 rounded text-white placeholder-slate-500 focus:outline-none focus:border-ocean-blue text-sm transition-colors"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300 transition-colors focus:outline-none"
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
           </div>
 

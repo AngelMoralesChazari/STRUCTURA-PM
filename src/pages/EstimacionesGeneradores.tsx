@@ -3,7 +3,7 @@ import type { Estimacion, Proyecto, ConceptoObra, Finiquito, EstimacionConceptoA
 import { dbAdapter } from '../db/dbAdapter';
 import { Plus, Eye, Image as ImageIcon, CheckCircle, XCircle, Trash2, ShieldCheck, Download } from 'lucide-react';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 interface EstimacionesGeneradoresProps {
   proyecto: Proyecto;
@@ -37,7 +37,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
 
   // Finiquito signatures
   const [firmanteResidente, setFirmanteResidente] = useState('Ing. Sofía Morales');
-  const [firmanteContratista, setFirmanteContratista] = useState('Ing. Carlos Mendoza');
+  const [firmanteContratista, setFirmanteContratista] = useState('Ing. Angel Morales Chazari');
   const [firmanteAuditor, setFirmanteAuditor] = useState('Mtro. Fernando Ortiz');
 
   useEffect(() => {
@@ -284,7 +284,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
   // individual estimation PDF generation
   const handleExportPDF = (est: Estimacion) => {
     const doc = new jsPDF();
-    const primaryColor = [15, 23, 42]; // #0F172A (Navy Slate)
+    const primaryColor: [number, number, number] = [15, 23, 42]; // #0F172A (Navy Slate)
 
     // Document Title
     doc.setFillColor(15, 23, 42);
@@ -331,7 +331,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
       ];
     });
 
-    (doc as any).autoTable({
+    autoTable(doc, {
       startY: 68,
       head: [['Cód.', 'Descripción del Concepto', 'Unid.', 'Precio ($)', 'Vol. Ant.', 'Vol. Act.', 'Vol. Acum.', 'Importe ($)']],
       body: tableRows,
@@ -360,7 +360,7 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
       ['LÍQUIDO NETO A PAGAR:', new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(est.liquidoAPagar)]
     ];
 
-    (doc as any).autoTable({
+    autoTable(doc, {
       startY: finalY,
       body: summaryRows,
       theme: 'plain',
@@ -473,12 +473,12 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
                         <td className="py-3 px-3 text-right text-emerald-green font-bold">{formatCurrency(est.liquidoAPagar)}</td>
                         <td className="py-3 px-3 text-center">
                           <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${est.estado === 'Aprobada'
-                              ? 'bg-emerald-green/10 text-emerald-green'
-                              : est.estado === 'Enviada'
-                                ? 'bg-blue-100 text-blue-700'
-                                : est.estado === 'Borrador'
-                                  ? 'bg-slate-100 text-slate-600'
-                                  : 'bg-red-100 text-red-700'
+                            ? 'bg-emerald-green/10 text-emerald-green'
+                            : est.estado === 'Enviada'
+                              ? 'bg-blue-100 text-blue-700'
+                              : est.estado === 'Borrador'
+                                ? 'bg-slate-100 text-slate-600'
+                                : 'bg-red-100 text-red-700'
                             }`}>
                             {est.estado}
                           </span>
@@ -771,16 +771,16 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
                   <div className="grid grid-cols-2 gap-x-8 max-w-sm">
                     <span className="text-slate-300">Monto Estimado Bruto:</span>
                     <span className="font-bold text-right">{formatCurrency(bruto)}</span>
-                    
+
                     <span className="text-red-400">Amortización Anticipo ({proyecto.anticipoPorcentaje}%):</span>
                     <span className="text-red-400 text-right">-{formatCurrency(amortizacion)}</span>
-                    
+
                     <span className="text-amber-400">Retención Garantía ({proyecto.retencionPorcentaje}%):</span>
                     <span className="text-amber-400 text-right">-{formatCurrency(retencion)}</span>
-                    
+
                     <span className="text-slate-400 border-t border-slate-700 mt-1 pt-1">Subtotal (Neto):</span>
                     <span className="text-slate-200 text-right border-t border-slate-700 mt-1 pt-1 font-bold">{formatCurrency(subtotal)}</span>
-                    
+
                     <span className="text-slate-400">IVA (+{proyecto.ivaPorcentaje}%):</span>
                     <span className="text-slate-200 text-right font-bold">+{formatCurrency(iva)}</span>
                   </div>
@@ -820,12 +820,12 @@ export const EstimacionesGeneradores: React.FC<EstimacionesGeneradoresProps> = (
               <h3 className="text-md font-bold text-navy-slate-900 mt-1 flex items-center gap-2">
                 <span>Estimación #{selectedEstimacion.numeroEstimacion}</span>
                 <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${selectedEstimacion.estado === 'Aprobada'
-                    ? 'bg-emerald-green/10 text-emerald-green'
-                    : selectedEstimacion.estado === 'Enviada'
-                      ? 'bg-blue-100 text-blue-700'
-                      : selectedEstimacion.estado === 'Borrador'
-                        ? 'bg-slate-100 text-slate-600'
-                        : 'bg-red-100 text-red-700'
+                  ? 'bg-emerald-green/10 text-emerald-green'
+                  : selectedEstimacion.estado === 'Enviada'
+                    ? 'bg-blue-100 text-blue-700'
+                    : selectedEstimacion.estado === 'Borrador'
+                      ? 'bg-slate-100 text-slate-600'
+                      : 'bg-red-100 text-red-700'
                   }`}>
                   {selectedEstimacion.estado}
                 </span>

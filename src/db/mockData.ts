@@ -8,14 +8,14 @@ export const mockProyectos: Proyecto[] = [
     descripcion: 'Construcción de superestructura de concreto y subestructura cimentada sobre pilotes para puente vehicular de dos carriles.',
     ubicacion: 'Carretera Federal Km 45+200, Veracruz, México',
     contratista: 'Cimentaciones y Puentes de México S.A. de C.V.',
-    montoContratado: 4578500.00, // Calculated from concepts
-    anticipoPorcentaje: 30, // 30% advance
-    amortizadoAcumulado: 412065.00,
-    retencionPorcentaje: 5, // 5% guarantee fund
+    montoContratado: 4570227.60,
+    anticipoPorcentaje: 30,
+    amortizadoAcumulado: 1371068.28,
+    retencionPorcentaje: 5,
     ivaPorcentaje: 16,
     fechaInicio: '2026-08-01',
     fechaFin: '2027-02-28',
-    estado: 'Ejecucion',
+    estado: 'Finiquitado',
     creadoEn: '2026-08-01T10:00:00Z'
   },
   {
@@ -290,12 +290,12 @@ export const mockEstimaciones: { [proyectoId: string]: Estimacion[] } = {
       numeroEstimacion: 1,
       periodoInicio: '2026-08-01',
       periodoFin: '2026-08-31',
-      montoBruto: 276428.00, // 250 * 154.36 (excavación) + 100 * 2379.66 (pilotes)
-      amortizacionAnticipo: 82928.40, // 30% of 276,428
-      retencionGarantia: 13821.40, // 5% of 276,428
-      subtotal: 179678.20, // 276,428 - 82,928.40 - 13,821.40
-      iva: 28748.51, // 16% of 179,678.20
-      liquidoAPagar: 208426.71,
+      montoBruto: 224332.00,
+      amortizacionAnticipo: 67299.60,
+      retencionGarantia: 11216.60,
+      subtotal: 145815.80,
+      iva: 23330.53,
+      liquidoAPagar: 169146.33,
       estado: 'Aprobada',
       fechaRegistro: '2026-08-31T17:00:00Z',
       soporteFotografico: [
@@ -303,38 +303,10 @@ export const mockEstimaciones: { [proyectoId: string]: Estimacion[] } = {
         'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="100%" height="100%" fill="%23e2e8f0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="16" fill="%23475569">Foto Generador 2: Habilitado de Pilotes</text></svg>'
       ],
       avances: [
-        {
-          conceptoId: 'c-01',
-          volumenAnterior: 0,
-          volumenActual: 250,
-          volumenAcumulado: 250,
-          saldoVolumen: 200,
-          importeActual: 38590.00
-        },
-        {
-          conceptoId: 'c-02',
-          volumenAnterior: 0,
-          volumenActual: 100,
-          volumenAcumulado: 100,
-          saldoVolumen: 280,
-          importeActual: 237966.00
-        },
-        {
-          conceptoId: 'c-03',
-          volumenAnterior: 0,
-          volumenActual: 0,
-          volumenAcumulado: 0,
-          saldoVolumen: 420,
-          importeActual: 0.00
-        },
-        {
-          conceptoId: 'c-04',
-          volumenAnterior: 0,
-          volumenActual: 0,
-          volumenAcumulado: 0,
-          saldoVolumen: 48,
-          importeActual: 0.00
-        }
+        { conceptoId: 'c-01', volumenAnterior: 0, volumenActual: 220, volumenAcumulado: 220, saldoVolumen: 230, importeActual: 33959.20 },
+        { conceptoId: 'c-02', volumenAnterior: 0, volumenActual: 80, volumenAcumulado: 80, saldoVolumen: 300, importeActual: 190372.80 },
+        { conceptoId: 'c-03', volumenAnterior: 0, volumenActual: 0, volumenAcumulado: 0, saldoVolumen: 420, importeActual: 0.00 },
+        { conceptoId: 'c-04', volumenAnterior: 0, volumenActual: 0, volumenAcumulado: 0, saldoVolumen: 48, importeActual: 0.00 }
       ]
     },
     {
@@ -343,50 +315,88 @@ export const mockEstimaciones: { [proyectoId: string]: Estimacion[] } = {
       numeroEstimacion: 2,
       periodoInicio: '2026-09-01',
       periodoFin: '2026-09-30',
-      montoBruto: 387821.00, // 200 * 154.36 (excavación) + 150 * 2379.66 (pilotes)
-      amortizacionAnticipo: 116346.30, // 30%
-      retencionGarantia: 19391.05, // 5%
-      subtotal: 252083.65,
-      iva: 40333.38,
-      liquidoAPagar: 292417.03,
-      estado: 'Enviada',
+      montoBruto: 321062.00,
+      amortizacionAnticipo: 96318.60,
+      retencionGarantia: 16053.10,
+      subtotal: 208690.30,
+      iva: 33390.45,
+      liquidoAPagar: 242080.75,
+      estado: 'Aprobada',
       fechaRegistro: '2026-09-30T16:00:00Z',
       soporteFotografico: [
         'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300"><rect width="100%" height="100%" fill="%23e2e8f0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="16" fill="%23475569">Foto Generador 3: Colado de Cabezal</text></svg>'
       ],
       avances: [
-        {
-          conceptoId: 'c-01',
-          volumenAnterior: 250,
-          volumenActual: 200,
-          volumenAcumulado: 450,
-          saldoVolumen: 0,
-          importeActual: 30872.00
-        },
-        {
-          conceptoId: 'c-02',
-          volumenAnterior: 100,
-          volumenActual: 150,
-          volumenAcumulado: 250,
-          saldoVolumen: 130,
-          importeActual: 356949.00
-        },
-        {
-          conceptoId: 'c-03',
-          volumenAnterior: 0,
-          volumenActual: 0,
-          volumenAcumulado: 0,
-          saldoVolumen: 420,
-          importeActual: 0.00
-        },
-        {
-          conceptoId: 'c-04',
-          volumenAnterior: 0,
-          volumenActual: 0,
-          volumenAcumulado: 0,
-          saldoVolumen: 48,
-          importeActual: 0.00
-        }
+        { conceptoId: 'c-01', volumenAnterior: 220, volumenActual: 230, volumenAcumulado: 450, saldoVolumen: 0, importeActual: 35502.80 },
+        { conceptoId: 'c-02', volumenAnterior: 80, volumenActual: 120, volumenAcumulado: 200, saldoVolumen: 180, importeActual: 285559.20 },
+        { conceptoId: 'c-03', volumenAnterior: 0, volumenActual: 0, volumenAcumulado: 0, saldoVolumen: 420, importeActual: 0.00 },
+        { conceptoId: 'c-04', volumenAnterior: 0, volumenActual: 0, volumenAcumulado: 0, saldoVolumen: 48, importeActual: 0.00 }
+      ]
+    },
+    {
+      id: 'est-003',
+      proyectoId: 'proj-001',
+      numeroEstimacion: 3,
+      periodoInicio: '2026-10-01',
+      periodoFin: '2026-10-31',
+      montoBruto: 1254143.40,
+      amortizacionAnticipo: 376243.02,
+      retencionGarantia: 62707.17,
+      subtotal: 815193.21,
+      iva: 130430.91,
+      liquidoAPagar: 945624.12,
+      estado: 'Aprobada',
+      fechaRegistro: '2026-10-31T17:00:00Z',
+      soporteFotografico: [],
+      avances: [
+        { conceptoId: 'c-01', volumenAnterior: 450, volumenActual: 0, volumenAcumulado: 450, saldoVolumen: 0, importeActual: 0.00 },
+        { conceptoId: 'c-02', volumenAnterior: 200, volumenActual: 180, volumenAcumulado: 380, saldoVolumen: 0, importeActual: 428338.80 },
+        { conceptoId: 'c-03', volumenAnterior: 0, volumenActual: 90, volumenAcumulado: 90, saldoVolumen: 330, importeActual: 439914.60 },
+        { conceptoId: 'c-04', volumenAnterior: 0, volumenActual: 12, volumenAcumulado: 12, saldoVolumen: 36, importeActual: 385890.00 }
+      ]
+    },
+    {
+      id: 'est-004',
+      proyectoId: 'proj-001',
+      numeroEstimacion: 4,
+      periodoInicio: '2026-11-01',
+      periodoFin: '2026-11-30',
+      montoBruto: 1522979.20,
+      amortizacionAnticipo: 456893.76,
+      retencionGarantia: 76148.96,
+      subtotal: 989936.48,
+      iva: 158389.84,
+      liquidoAPagar: 1148326.32,
+      estado: 'Aprobada',
+      fechaRegistro: '2026-11-30T17:00:00Z',
+      soporteFotografico: [],
+      avances: [
+        { conceptoId: 'c-01', volumenAnterior: 450, volumenActual: 0, volumenAcumulado: 450, saldoVolumen: 0, importeActual: 0.00 },
+        { conceptoId: 'c-02', volumenAnterior: 380, volumenActual: 0, volumenAcumulado: 380, saldoVolumen: 0, importeActual: 0.00 },
+        { conceptoId: 'c-03', volumenAnterior: 90, volumenActual: 180, volumenAcumulado: 270, saldoVolumen: 150, importeActual: 879829.20 },
+        { conceptoId: 'c-04', volumenAnterior: 12, volumenActual: 20, volumenAcumulado: 32, saldoVolumen: 16, importeActual: 643150.00 }
+      ]
+    },
+    {
+      id: 'est-005',
+      proyectoId: 'proj-001',
+      numeroEstimacion: 5,
+      periodoInicio: '2026-12-01',
+      periodoFin: '2026-12-31',
+      montoBruto: 1247711.00,
+      amortizacionAnticipo: 374313.30,
+      retencionGarantia: 62385.55,
+      subtotal: 811012.15,
+      iva: 129761.94,
+      liquidoAPagar: 940774.09,
+      estado: 'Aprobada',
+      fechaRegistro: '2026-12-31T17:00:00Z',
+      soporteFotografico: [],
+      avances: [
+        { conceptoId: 'c-01', volumenAnterior: 450, volumenActual: 0, volumenAcumulado: 450, saldoVolumen: 0, importeActual: 0.00 },
+        { conceptoId: 'c-02', volumenAnterior: 380, volumenActual: 0, volumenAcumulado: 380, saldoVolumen: 0, importeActual: 0.00 },
+        { conceptoId: 'c-03', volumenAnterior: 270, volumenActual: 150, volumenAcumulado: 420, saldoVolumen: 0, importeActual: 733191.00 },
+        { conceptoId: 'c-04', volumenAnterior: 32, volumenActual: 16, volumenAcumulado: 48, saldoVolumen: 0, importeActual: 514520.00 }
       ]
     }
   ],
@@ -421,6 +431,21 @@ export const mockEstimaciones: { [proyectoId: string]: Estimacion[] } = {
 };
 
 export const mockFiniquitos: { [proyectoId: string]: Finiquito } = {
+  'proj-01': {
+    id: 'fin-01',
+    proyectoId: 'proj-001',
+    montoOriginal: 4570227.60,
+    montoEjecutadoReal: 4570227.60,
+    montoAmortizadoTotal: 1371068.28,
+    montoRetenidoTotal: 228511.38,
+    montoDevueltoRetenciones: 228511.38,
+    saldoFinalLiquido: 228511.38,
+    estado: 'Firmado',
+    fechaFirma: '2027-01-15',
+    firmanteAuditor: 'Dr. Severino Feliciano Morales (Supervisión / Auditoria)',
+    firmanteContratista: 'Ing. Angel Morales Chazari (Representante Legal)',
+    firmanteResidente: 'Ing. Sofía Morales (Residente de Obra)'
+  },
   'proj-002': {
     id: 'fin-002',
     proyectoId: 'proj-002',
@@ -433,7 +458,7 @@ export const mockFiniquitos: { [proyectoId: string]: Finiquito } = {
     estado: 'Firmado',
     fechaFirma: '2026-07-28',
     firmanteAuditor: 'Arq. Luis Gómez (Auditor Externo)',
-    firmanteContratista: 'Ing. Carlos Mendoza (Representante Legal)',
+    firmanteContratista: 'Ing. Angel Morales Chazari (Representante Legal)',
     firmanteResidente: 'Ing. Alberto Silva (Residente de Obra)'
   }
 };

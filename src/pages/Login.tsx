@@ -75,15 +75,15 @@ export const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           <p className="text-slate-400 text-sm mt-1">Structural Project & Cost Management</p>
         </div>
 
-        {/* Firebase Config Notice */}
-        <div className="mb-6 p-3 bg-navy-slate-900/50 rounded-lg border border-slate-gray-700 flex items-center gap-3">
-          <div className={`w-3.5 h-3.5 rounded-full ${isFirebaseConfigured ? 'bg-emerald-green animate-pulse' : 'bg-amber-500 animate-pulse'}`}></div>
-          <span className="text-xs text-slate-300">
-            {isFirebaseConfigured 
-              ? 'Conectado a Firebase Cloud Database' 
-              : 'Modo Simulación Activo (Datos Locales)'}
-          </span>
-        </div>
+        {/* Firebase Config Notice - Only shown when NOT configured to warn developer/user */}
+        {!isFirebaseConfigured && (
+          <div className="mb-6 p-3 bg-navy-slate-900/50 rounded-lg border border-slate-gray-700 flex items-center gap-3">
+            <div className="w-3.5 h-3.5 rounded-full bg-amber-500 animate-pulse"></div>
+            <span className="text-xs text-slate-300">
+              Modo Simulación Activo (Datos Locales)
+            </span>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-3 bg-red-950/50 border border-red-800 text-red-300 rounded text-sm">

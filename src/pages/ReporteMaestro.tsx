@@ -3,7 +3,7 @@ import type { Proyecto, Estimacion, ConceptoObra, Finiquito } from '../types';
 import { dbAdapter } from '../db/dbAdapter';
 import { FileText, Download, ShieldCheck, Sparkles, DollarSign } from 'lucide-react';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 interface ReporteMaestroProps {
   proyecto: Proyecto;
@@ -51,7 +51,7 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
     setGenerating(true);
     try {
       const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
-      const navyColor = [15, 23, 42]; // #0F172A
+      const navyColor: [number, number, number] = [15, 23, 42]; // #0F172A
       
       // ==========================================
       // PAGE 1: COVER SHEET (CARÁTULA INSTITUCIONAL)
@@ -178,7 +178,7 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
         ["Saldo Contratado por Ejercer", formatCurrency(saldoEjercer)]
       ];
 
-      (doc as any).autoTable({
+      autoTable(doc, {
         startY: 34,
         body: summaryTable,
         theme: 'striped',
@@ -234,7 +234,7 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
         ];
       });
 
-      (doc as any).autoTable({
+      autoTable(doc, {
         startY: finalY1 + 6,
         head: [['Mes', 'Programado ($)', 'Prog. Acum. ($)', 'Real ($)', 'Real Acum. ($)', '% Eficiencia']],
         body: curveTableRows,
@@ -274,7 +274,7 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
         formatCurrency(c.importe)
       ]);
 
-      (doc as any).autoTable({
+      autoTable(doc, {
         startY: 34,
         head: [['Partida', 'Cód.', 'Descripción de Concepto', 'Unid.', 'Cant.', 'Precio ($)', 'Importe ($)']],
         body: tableRows,
@@ -314,7 +314,7 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
         e.estado
       ]);
 
-      (doc as any).autoTable({
+      autoTable(doc, {
         startY: 34,
         head: [['N°', 'Período', 'Monto Bruto ($)', 'Amortizado ($)', 'Retenido ($)', 'Líquido ($)', 'Estado']],
         body: estRows,

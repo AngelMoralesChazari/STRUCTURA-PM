@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Proyecto, Estimacion, ConceptoObra, Finiquito } from '../types';
 import { dbAdapter } from '../db/dbAdapter';
-import { FileText, Download, ShieldCheck, Sparkles, DollarSign } from 'lucide-react';
+import { FileText, Download, ShieldCheck, Sparkles, DollarSign, Layers, FileSpreadsheet } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -17,8 +17,8 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
   const [generating, setGenerating] = useState(false);
 
   const [firmanteResidente] = useState('Ing. Sofía Morales');
-  const [firmanteContratista] = useState('Ing. Carlos Mendoza');
-  const [firmanteAuditor] = useState('Mtro. Fernando Ortiz');
+  const [firmanteContratista] = useState('Ing. Angel Morales Chazari');
+  const [firmanteAuditor] = useState('Dr. Severino Feliciano Morales');
 
   useEffect(() => {
     setLoading(true);
@@ -43,6 +43,87 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
     };
   }, [proyecto.id]);
 
+  interface InsumoExplosionItem {
+    codigo: string;
+    descripcion: string;
+    tipo: 'Material' | 'Mano de Obra' | 'Maquinaria';
+    unidad: string;
+    costoUnitario: number;
+    cantidadTotal: number;
+    importeTotal: number;
+  }
+
+  const getExplosionInsumos = (): InsumoExplosionItem[] => {
+    const map: { [codigo: string]: InsumoExplosionItem } = {};
+
+    conceptos.forEach(c => {
+      const budgetQty = c.cantidadPresupuestada;
+      if (c.apu) {
+        if (c.apu.materiales) {
+          c.apu.materiales.forEach(ins => {
+            const totalQty = ins.rendimiento * budgetQty;
+            if (map[ins.codigo]) {
+              map[ins.codigo].cantidadTotal += totalQty;
+              map[ins.codigo].importeTotal += totalQty * ins.costoUnitario;
+            } else {
+              map[ins.codigo] = {
+                codigo: ins.codigo,
+                descripcion: ins.descripcion,
+                tipo: 'Material',
+                unidad: ins.unidad,
+                costoUnitario: ins.costoUnitario,
+                cantidadTotal: totalQty,
+                importeTotal: totalQty * ins.costoUnitario
+              };
+            }
+          });
+        }
+
+        if (c.apu.manoObra) {
+          c.apu.manoObra.forEach(ins => {
+            const totalQty = ins.rendimiento * budgetQty;
+            if (map[ins.codigo]) {
+              map[ins.codigo].cantidadTotal += totalQty;
+              map[ins.codigo].importeTotal += totalQty * ins.costoUnitario;
+            } else {
+              map[ins.codigo] = {
+                codigo: ins.codigo,
+                descripcion: ins.descripcion,
+                tipo: 'Mano de Obra',
+                unidad: ins.unidad,
+                costoUnitario: ins.costoUnitario,
+                cantidadTotal: totalQty,
+                importeTotal: totalQty * ins.costoUnitario
+              };
+            }
+          });
+        }
+
+        if (c.apu.maquinaria) {
+          c.apu.maquinaria.forEach(ins => {
+            const totalQty = ins.rendimiento * budgetQty;
+            if (map[ins.codigo]) {
+              map[ins.codigo].cantidadTotal += totalQty;
+              map[ins.codigo].importeTotal += totalQty * ins.costoUnitario;
+            } else {
+              map[ins.codigo] = {
+                codigo: ins.codigo,
+                descripcion: ins.descripcion,
+                tipo: 'Maquinaria',
+                unidad: ins.unidad,
+                costoUnitario: ins.costoUnitario,
+                cantidadTotal: totalQty,
+                importeTotal: totalQty * ins.costoUnitario
+              };
+            }
+          });
+        }
+      }
+    });
+
+    return Object.values(map);
+  };
+
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(val);
   };
@@ -52,15 +133,15 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
     try {
       const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
       const navyColor: [number, number, number] = [15, 23, 42]; // #0F172A
-      
+
       // ==========================================
       // PAGE 1: COVER SHEET (CARÁTULA INSTITUCIONAL)
       // ==========================================
-      
+
       // Top Navy Border
       doc.setFillColor(15, 23, 42);
       doc.rect(0, 0, 210, 45, 'F');
-      
+
       // Top Cover Accent
       doc.setFillColor(2, 132, 199);
       doc.rect(0, 45, 210, 3, 'F');
@@ -78,15 +159,15 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
       doc.setTextColor(15, 23, 42);
       doc.setFont("helvetica", "bold");
       doc.setFontSize(18);
-      doc.text("REPORTE GENERAL MAESTRO", 20, 75);
-      
+      doc.text("REPORTE GENERAL", 20, 75);
+
       // Project Details Card on Cover
       doc.setFontSize(10);
       doc.setTextColor(71, 85, 105);
       doc.text("OBRA / INFRAESTRUCTURA:", 20, 95);
       doc.setTextColor(15, 23, 42);
       doc.setFont("helvetica", "bold");
-      
+
       // Wrap long project names
       const splitProjName = doc.splitTextToSize(proyecto.nombre, 170);
       doc.text(splitProjName, 20, 101);
@@ -126,7 +207,7 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
       doc.rect(20, 170 + offsetProjNameY, 170, 20, 'F');
       doc.setDrawColor(226, 232, 240);
       doc.rect(20, 170 + offsetProjNameY, 170, 20, 'S');
-      
+
       doc.setTextColor(71, 85, 105);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
@@ -148,7 +229,7 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
       // PAGE 2: RESUMEN FINANCIERO EJECUTIVO
       // ==========================================
       doc.addPage();
-      
+
       // Page header
       doc.setFillColor(15, 23, 42);
       doc.rect(0, 0, 210, 15, 'F');
@@ -160,7 +241,7 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
       doc.setTextColor(15, 23, 42);
       doc.setFontSize(14);
       doc.text("1. Resumen Ejecutivo de Cuentas", 15, 28);
-      
+
       const approvedEst = estimaciones.filter(e => e.estado === 'Aprobada');
       const totalEjercido = approvedEst.reduce((sum, e) => sum + e.montoBruto, 0);
       const totalAnticipo = proyecto.montoContratado * (proyecto.anticipoPorcentaje / 100);
@@ -291,7 +372,116 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
       });
 
       // ==========================================
-      // PAGE 4: ESTADO DE ESTIMACIONES Y ACTA FINIQUITO
+      // PAGE 4: EXPLOSIÓN DETALLADA DE INSUMOS
+      // ==========================================
+      doc.addPage();
+      doc.setFillColor(15, 23, 42);
+      doc.rect(0, 0, 210, 15, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.text("STRUCTURA-PM | EXPLOSIÓN CONSOLIDADA DE INSUMOS", 15, 10);
+
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(14);
+      doc.text("4. Explosión Consolidada de Insumos (Recursos)", 15, 25);
+
+      const explosionData = getExplosionInsumos();
+      const materialItems = explosionData.filter(i => i.tipo === 'Material');
+      const manoObraItems = explosionData.filter(i => i.tipo === 'Mano de Obra');
+      const maquinariaItems = explosionData.filter(i => i.tipo === 'Maquinaria');
+
+      // 4.1 Materiales
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text(`4.1 Materiales (Subtotal: ${formatCurrency(materialItems.reduce((s, i) => s + i.importeTotal, 0))})`, 15, 33);
+
+      const matRows = materialItems.map(i => [
+        i.codigo,
+        i.descripcion,
+        i.unidad,
+        i.cantidadTotal.toFixed(2),
+        formatCurrency(i.costoUnitario),
+        formatCurrency(i.importeTotal)
+      ]);
+
+      autoTable(doc, {
+        startY: 36,
+        head: [['Código', 'Descripción del Insumo', 'Unid.', 'Cant. Total', 'Costo Unit.', 'Importe ($)']],
+        body: matRows,
+        theme: 'grid',
+        headStyles: { fillColor: [51, 65, 85], fontSize: 8 },
+        bodyStyles: { fontSize: 7.5 },
+        columnStyles: {
+          1: { cellWidth: 80 },
+          3: { halign: 'right' },
+          4: { halign: 'right' },
+          5: { halign: 'right' }
+        }
+      });
+
+      // 4.2 Mano de Obra
+      const finalYMat = (doc as any).lastAutoTable.finalY + 8;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text(`4.2 Mano de Obra (Subtotal: ${formatCurrency(manoObraItems.reduce((s, i) => s + i.importeTotal, 0))})`, 15, finalYMat);
+
+      const moRows = manoObraItems.map(i => [
+        i.codigo,
+        i.descripcion,
+        i.unidad,
+        i.cantidadTotal.toFixed(2),
+        formatCurrency(i.costoUnitario),
+        formatCurrency(i.importeTotal)
+      ]);
+
+      autoTable(doc, {
+        startY: finalYMat + 4,
+        head: [['Código', 'Especialidad / Categoría', 'Unid.', 'Jornadas Tot.', 'Salario Real', 'Importe ($)']],
+        body: moRows,
+        theme: 'grid',
+        headStyles: { fillColor: [51, 65, 85], fontSize: 8 },
+        bodyStyles: { fontSize: 7.5 },
+        columnStyles: {
+          1: { cellWidth: 80 },
+          3: { halign: 'right' },
+          4: { halign: 'right' },
+          5: { halign: 'right' }
+        }
+      });
+
+      // 4.3 Maquinaria y Equipo
+      const finalYMo = (doc as any).lastAutoTable.finalY + 8;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text(`4.3 Maquinaria y Equipo (Subtotal: ${formatCurrency(maquinariaItems.reduce((s, i) => s + i.importeTotal, 0))})`, 15, finalYMo);
+
+      const maqRows = maquinariaItems.map(i => [
+        i.codigo,
+        i.descripcion,
+        i.unidad,
+        i.cantidadTotal.toFixed(2),
+        formatCurrency(i.costoUnitario),
+        formatCurrency(i.importeTotal)
+      ]);
+
+      autoTable(doc, {
+        startY: finalYMo + 4,
+        head: [['Código', 'Descripción del Equipo', 'Unid.', 'Horas Tot.', 'Costo Horario', 'Importe ($)']],
+        body: maqRows,
+        theme: 'grid',
+        headStyles: { fillColor: [51, 65, 85], fontSize: 8 },
+        bodyStyles: { fontSize: 7.5 },
+        columnStyles: {
+          1: { cellWidth: 80 },
+          3: { halign: 'right' },
+          4: { halign: 'right' },
+          5: { halign: 'right' }
+        }
+      });
+
+      // ==========================================
+      // PAGE 5: ESTADO DE ESTIMACIONES Y ACTA FINIQUITO
       // ==========================================
       doc.addPage();
       doc.setFillColor(15, 23, 42);
@@ -302,7 +492,7 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
 
       doc.setTextColor(15, 23, 42);
       doc.setFontSize(14);
-      doc.text("4. Relación de Estimaciones Tramitadas", 15, 28);
+      doc.text("5. Relación de Estimaciones Tramitadas", 15, 28);
 
       const estRows = estimaciones.map(e => [
         `#${e.numeroEstimacion}`,
@@ -332,20 +522,20 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
 
       const finalY4 = (doc as any).lastAutoTable.finalY + 12;
       doc.setFontSize(14);
-      doc.text("5. Acta de Cierre y Finiquito", 15, finalY4);
-      
+      doc.text("6. Acta de Cierre y Finiquito", 15, finalY4);
+
       doc.setFontSize(9.5);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(71, 85, 105);
-      
+
       const finiquitoText = `Reunidos los firmantes al calce, se declara que los trabajos del contrato ${proyecto.codigo} se encuentran terminados y ejecutados conforme a las especificaciones pactadas. Las partes hacen constar que el balance final resulta en un saldo liquidador por la cantidad de ${finiquito ? formatCurrency(finiquito.saldoFinalLiquido) : formatCurrency(totalEjercido)} pesos, dándose por liquidados de común acuerdo y sin más reclamaciones que formular.`;
-      
+
       const splitText = doc.splitTextToSize(finiquitoText, 180);
       doc.text(splitText, 15, finalY4 + 6);
 
       // Signatures
       const sigY = finalY4 + 38;
-      
+
       doc.setDrawColor(148, 163, 184);
       doc.line(15, sigY, 70, sigY);
       doc.setFont("helvetica", "bold");
@@ -367,7 +557,7 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
       doc.setFont("helvetica", "normal");
       doc.text("SUPERVISIÓN / AUDITORIA", 75, sigY + 33);
 
-      doc.save(`Reporte_Maestro_${proyecto.codigo}.pdf`);
+      doc.save(`Reporte_General_${proyecto.codigo}.pdf`);
     } catch (err) {
       console.error(err);
     } finally {
@@ -388,7 +578,7 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
       {/* Module Title */}
       <div className="bg-white p-6 rounded-xl border border-light-slate shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-xl font-bold text-navy-slate-900 tracking-tight">Reporte General Maestro (Finiquito de Obra)</h2>
+          <h2 className="text-xl font-bold text-navy-slate-900 tracking-tight">Reporte General (Finiquito de Obra)</h2>
           <p className="text-xs text-slate-gray-600 mt-1">
             Consolidado ejecutivo integral listo para impresión y auditoría oficial. Genera un expediente PDF formal de alta calidad.
           </p>
@@ -399,7 +589,7 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
           className="flex items-center gap-1.5 px-4 py-2.5 bg-ocean-blue hover:bg-ocean-blue/90 text-white rounded font-bold text-xs shadow-sm transition-colors"
         >
           <Download size={14} />
-          {generating ? 'Generando PDF...' : 'Descargar Reporte Maestro (PDF)'}
+          {generating ? 'Generando PDF...' : 'Descargar Reporte General (PDF)'}
         </button>
       </div>
 
@@ -516,16 +706,111 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
           </div>
         </div>
 
+        {/* Explosión Detallada de Insumos Mini */}
+        <div className="space-y-4">
+          <h4 className="text-xs font-bold text-navy-slate-950 uppercase tracking-wider border-b border-light-slate pb-1 flex items-center gap-1.5">
+            <Layers size={14} className="text-ocean-blue" />
+            3. Explosión Consolidada de Insumos (Recursos)
+          </h4>
+          <div className="space-y-3">
+            {(() => {
+              const explosionData = getExplosionInsumos();
+              const categories = [
+                { title: '3.1 Materiales', items: explosionData.filter(i => i.tipo === 'Material'), headers: ['Código', 'Descripción del Insumo', 'Unid.', 'Cant. Total', 'Costo Unit.', 'Importe ($)'] },
+                { title: '3.2 Mano de Obra', items: explosionData.filter(i => i.tipo === 'Mano de Obra'), headers: ['Código', 'Especialidad / Categoría', 'Unid.', 'Jornadas Tot.', 'Salario Real', 'Importe ($)'] },
+                { title: '3.3 Maquinaria y Equipo', items: explosionData.filter(i => i.tipo === 'Maquinaria'), headers: ['Código', 'Descripción del Equipo', 'Unid.', 'Horas Tot.', 'Costo Horario', 'Importe ($)'] }
+              ];
+
+              return categories.map(cat => {
+                const subtotal = cat.items.reduce((s, i) => s + i.importeTotal, 0);
+                if (cat.items.length === 0) return null;
+
+                return (
+                  <div key={cat.title} className="space-y-1.5">
+                    <div className="flex justify-between items-center text-[10px] font-bold text-navy-slate-800">
+                      <span>{cat.title}</span>
+                      <span className="text-ocean-blue font-mono">Subtotal: {formatCurrency(subtotal)}</span>
+                    </div>
+                    <div className="overflow-x-auto text-[10px] border border-light-slate rounded">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-slate-50 text-slate-500 font-bold text-[9px] uppercase border-b border-light-slate">
+                            {cat.headers.map(h => (
+                              <th key={h} className={`py-1.5 px-2 ${h === 'Código' || h === 'Descripción del Insumo' || h === 'Especialidad / Categoría' || h === 'Descripción del Equipo' ? 'text-left' : h === 'Unid.' ? 'text-center' : 'text-right'}`}>{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-light-slate font-mono text-[9.5px]">
+                          {cat.items.map(item => (
+                            <tr key={item.codigo}>
+                              <td className="py-1.5 px-2 font-bold text-left">{item.codigo}</td>
+                              <td className="py-1.5 px-2 font-sans text-left truncate max-w-xs">{item.descripcion}</td>
+                              <td className="py-1.5 px-2 text-center font-sans text-slate-500">{item.unidad}</td>
+                              <td className="py-1.5 px-2 text-right">{item.cantidadTotal.toFixed(2)}</td>
+                              <td className="py-1.5 px-2 text-right text-slate-400">{formatCurrency(item.costoUnitario)}</td>
+                              <td className="py-1.5 px-2 text-right font-bold text-navy-slate-900">{formatCurrency(item.importeTotal)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+        </div>
+
+        {/* Relación de Estimaciones Mini */}
+        <div className="space-y-3">
+          <h4 className="text-xs font-bold text-navy-slate-950 uppercase tracking-wider border-b border-light-slate pb-1 flex items-center gap-1.5">
+            <FileSpreadsheet size={14} className="text-ocean-blue" />
+            4. Relación de Estimaciones Tramitadas
+          </h4>
+          <div className="overflow-x-auto text-xs border border-light-slate rounded">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 text-slate-500 font-bold text-[10px] uppercase border-b border-light-slate">
+                  <th className="py-2 px-3">N°</th>
+                  <th className="py-2 px-3">Período</th>
+                  <th className="py-2 px-3 text-right">Monto Bruto ($)</th>
+                  <th className="py-2 px-3 text-right">Amortizado ($)</th>
+                  <th className="py-2 px-3 text-right">Retenido ($)</th>
+                  <th className="py-2 px-3 text-right">Líquido ($)</th>
+                  <th className="py-2 px-3 text-center">Estado</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-light-slate font-mono">
+                {estimaciones.map(e => (
+                  <tr key={e.id}>
+                    <td className="py-2 px-3 font-sans font-bold">#{e.numeroEstimacion}</td>
+                    <td className="py-2 px-3 font-sans">{e.periodoInicio} al {e.periodoFin}</td>
+                    <td className="py-2 px-3 text-right">{formatCurrency(e.montoBruto)}</td>
+                    <td className="py-2 px-3 text-right text-red-600">-{formatCurrency(e.amortizacionAnticipo)}</td>
+                    <td className="py-2 px-3 text-right text-red-600">-{formatCurrency(e.retencionGarantia)}</td>
+                    <td className="py-2 px-3 text-right font-bold text-emerald-green">{formatCurrency(e.liquidoAPagar)}</td>
+                    <td className="py-2 px-3 text-center">
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+                        e.estado === 'Aprobada' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                      }`}>{e.estado}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         {/* Acta y Firmas Mini */}
         <div className="space-y-3">
           <h4 className="text-xs font-bold text-navy-slate-950 uppercase tracking-wider border-b border-light-slate pb-1 flex items-center gap-1.5">
             <ShieldCheck size={14} className="text-emerald-green" />
-            3. Protocolo de Acta de Entrega y Cierre
+            5. Protocolo de Acta de Entrega y Cierre
           </h4>
           <p className="text-[11px] text-slate-500 leading-relaxed text-left">
             Declaración formal de conclusión física y económica de los trabajos conforme al contrato de referencia.
           </p>
-          <div className="grid grid-cols-3 gap-6 pt-6 text-[10px] font-bold text-center text-slate-700">
+          <div className="grid grid-cols-3 gap-6 pt-6 text-[10px] font-bold text-center text-slate-700 font-sans">
             <div className="space-y-1">
               <div className="border-t border-slate-300 pt-2">{finiquito?.firmanteContratista || firmanteContratista}</div>
               <div className="font-normal text-slate-400">Representante Legal (Contratista)</div>
@@ -536,7 +821,7 @@ export const ReporteMaestro: React.FC<ReporteMaestroProps> = ({ proyecto }) => {
             </div>
             <div className="space-y-1">
               <div className="border-t border-slate-300 pt-2">{finiquito?.firmanteAuditor || firmanteAuditor}</div>
-              <div className="font-normal text-slate-400">Auditor Interno</div>
+              <div className="font-normal text-slate-400">Supervisión / Auditoría</div>
             </div>
           </div>
         </div>

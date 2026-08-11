@@ -11,17 +11,17 @@ import { EstimacionesGeneradores } from './pages/EstimacionesGeneradores';
 import { ReporteMaestro } from './pages/ReporteMaestro';
 import { auth } from './firebase';
 
-import { 
-  Layers, 
-  Hammer, 
-  Percent, 
-  FileSpreadsheet, 
-  Calendar, 
-  LogOut, 
-  Plus, 
-  FolderGit2, 
-  MapPin, 
-  Building2, 
+import {
+  Layers,
+  Hammer,
+  Percent,
+  FileSpreadsheet,
+  Calendar,
+  LogOut,
+  Plus,
+  FolderGit2,
+  MapPin,
+  Building2,
   FolderOpen,
   User,
   ShieldCheck,
@@ -35,10 +35,10 @@ function App() {
   const [selectedProject, setSelectedProject] = useState<Proyecto | null>(null);
   const [estimaciones, setEstimaciones] = useState<Estimacion[]>([]);
   const [conceptos, setConceptos] = useState<ConceptoObra[]>([]);
-  
+
   // Navigation active tab
   const [activeTab, setActiveTab] = useState<string>('dashboard');
-  
+
   // Project creation modal state
   const [isCreatingProject, setIsCreatingProject] = useState(false);
   const [newProjCodigo, setNewProjCodigo] = useState('');
@@ -203,8 +203,8 @@ function App() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {proyectos.map((p) => {
                   return (
-                    <div 
-                      key={p.id} 
+                    <div
+                      key={p.id}
                       className="bg-white border border-light-slate rounded-xl p-6 shadow-sm hover:shadow-md hover:border-ocean-blue/40 transition-all flex flex-col justify-between"
                     >
                       <div className="space-y-4">
@@ -215,13 +215,12 @@ function App() {
                             </span>
                             <h3 className="text-base font-bold text-navy-slate-900 mt-2">{p.nombre}</h3>
                           </div>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                            p.estado === 'Finiquitado' 
-                              ? 'bg-emerald-green/10 text-emerald-green' 
-                              : p.estado === 'Ejecucion' 
-                                ? 'bg-blue-100 text-blue-700' 
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${p.estado === 'Finiquitado'
+                              ? 'bg-emerald-green/10 text-emerald-green'
+                              : p.estado === 'Ejecucion'
+                                ? 'bg-blue-100 text-blue-700'
                                 : 'bg-slate-100 text-slate-600'
-                          }`}>
+                            }`}>
                             {p.estado}
                           </span>
                         </div>
@@ -429,9 +428,9 @@ function App() {
     switch (activeTab) {
       case 'dashboard':
         return (
-          <ProjectDashboard 
-            proyecto={selectedProject} 
-            estimaciones={estimaciones} 
+          <ProjectDashboard
+            proyecto={selectedProject}
+            estimaciones={estimaciones}
             conceptos={conceptos}
           />
         );
@@ -445,9 +444,9 @@ function App() {
         return <ProgramacionInsumos proyecto={selectedProject} rol={user.rol} />;
       case 'estimaciones':
         return (
-          <EstimacionesGeneradores 
-            proyecto={selectedProject} 
-            rol={user.rol} 
+          <EstimacionesGeneradores
+            proyecto={selectedProject}
+            rol={user.rol}
             estimaciones={estimaciones}
             conceptos={conceptos}
           />
@@ -497,11 +496,10 @@ function App() {
               <div className="space-y-1">
                 <button
                   onClick={() => setActiveTab('dashboard')}
-                  className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-lg transition-colors text-left ${
-                    activeTab === 'dashboard'
+                  className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-semibold rounded-lg transition-colors text-left ${activeTab === 'dashboard'
                       ? 'bg-ocean-blue text-white shadow-sm font-bold'
                       : 'text-slate-300 hover:bg-navy-slate-800/60 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <TrendingUp size={19} className={activeTab === 'dashboard' ? 'text-white' : 'text-slate-400'} />
                   Panel de Control
@@ -515,44 +513,40 @@ function App() {
               <div className="space-y-1">
                 <button
                   onClick={() => setActiveTab('fasar')}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${
-                    activeTab === 'fasar'
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${activeTab === 'fasar'
                       ? 'bg-ocean-blue text-white shadow-sm font-bold'
                       : 'text-slate-300 hover:bg-navy-slate-800/60 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <Hammer size={19} className={activeTab === 'fasar' ? 'text-white' : 'text-slate-400'} />
                   FASAR & Mano de Obra
                 </button>
                 <button
                   onClick={() => setActiveTab('sobrecosto')}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${
-                    activeTab === 'sobrecosto'
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${activeTab === 'sobrecosto'
                       ? 'bg-ocean-blue text-white shadow-sm font-bold'
                       : 'text-slate-300 hover:bg-navy-slate-800/60 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <Percent size={19} className={activeTab === 'sobrecosto' ? 'text-white' : 'text-slate-400'} />
                   Análisis de Sobrecosto
                 </button>
                 <button
                   onClick={() => setActiveTab('apu')}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${
-                    activeTab === 'apu'
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${activeTab === 'apu'
                       ? 'bg-ocean-blue text-white shadow-sm font-bold'
                       : 'text-slate-300 hover:bg-navy-slate-800/60 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <Layers size={19} className={activeTab === 'apu' ? 'text-white' : 'text-slate-400'} />
                   Matriz APU & Catálogo
                 </button>
                 <button
                   onClick={() => setActiveTab('programacion')}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${
-                    activeTab === 'programacion'
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${activeTab === 'programacion'
                       ? 'bg-ocean-blue text-white shadow-sm font-bold'
                       : 'text-slate-300 hover:bg-navy-slate-800/60 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <Calendar size={19} className={activeTab === 'programacion' ? 'text-white' : 'text-slate-400'} />
                   Programación e Insumos
@@ -566,25 +560,23 @@ function App() {
               <div className="space-y-1">
                 <button
                   onClick={() => setActiveTab('estimaciones')}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${
-                    activeTab === 'estimaciones'
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${activeTab === 'estimaciones'
                       ? 'bg-ocean-blue text-white shadow-sm font-bold'
                       : 'text-slate-300 hover:bg-navy-slate-800/60 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <FileSpreadsheet size={19} className={activeTab === 'estimaciones' ? 'text-white' : 'text-slate-400'} />
                   Estimaciones y Finiquito
                 </button>
                 <button
                   onClick={() => setActiveTab('reportes')}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${
-                    activeTab === 'reportes'
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-semibold rounded-lg transition-colors text-left ${activeTab === 'reportes'
                       ? 'bg-ocean-blue text-white shadow-sm font-bold'
                       : 'text-slate-300 hover:bg-navy-slate-800/60 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <FileText size={19} className={activeTab === 'reportes' ? 'text-white' : 'text-slate-400'} />
-                  Reporte Maestro (Cierre)
+                  Reporte General (Cierre)
                 </button>
               </div>
             </div>
